@@ -17,7 +17,7 @@ int connectionListenerCreate(connectionListener *conListener, int port)
     if(conListener = 0)
     {
         perror("Error allocating connection listener.");
-        return 1;
+        return -1;
     }
 
     conListener->true = 1;
@@ -35,7 +35,7 @@ int connectionListenerCreate(connectionListener *conListener, int port)
    if ((conListener->sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
    {
      perror("Error creating socket");
-     return 2;
+     return -2;
    }
    
    /* Funcao setsockopt(int socket, int level, int optname, void*optval, size_t optlen)
@@ -60,7 +60,7 @@ int connectionListenerCreate(connectionListener *conListener, int port)
    if (setsockopt(conListener->sock, SOL_SOCKET, SO_REUSEADDR, &conListener->true,sizeof(int)) == -1)
    {
       perror("Error in Setsockopt");
-      return 3;
+      return -3;
    }
 
     // Configura o endereco de destino
@@ -84,7 +84,7 @@ int connectionListenerCreate(connectionListener *conListener, int port)
     if (bind(conListener->sock, (struct sockaddr *)&conListener->addr, sizeof(struct sockaddr)) == -1)
     {
         perror("Impossible to bind");
-        return 4;
+        return -4;
     }
 
     /* Como estamos criando um servidor que ira receber solicitacoes este socket deve ficar "ouvindo" (aguardando conexoes) na
@@ -102,7 +102,7 @@ int connectionListenerCreate(connectionListener *conListener, int port)
     if (listen(conListener->sock, 10) == -1)
     {
         perror("Error in Listen");
-        return 5;
+        return -5;
     }
 
     return 0;
@@ -112,10 +112,14 @@ void *connectionListenerListen(void *data)
 {
     connectionListener *conListener = (connectionListener*)data;
 
+    struct sockaddr_in client_addr;
+    int sin_size;
+    int connected;
+    
     while(running)
     {
         // Variavel para armazenar o tamanho de endereco do cliente conectado
- //TODO       sin_size = sizeof(struct sockaddr_in);
+        sin_size = sizeof(struct sockaddr_in);
 
         /* Funcao accept(int socket, struct sockaddr*addr, size_t*length_ptr)
 	        A funcao accept aceita uma conexao e cria um novo socket para esta conexao
@@ -129,7 +133,8 @@ void *connectionListenerListen(void *data)
       	    Obs: A funcao accept por padrão fica aguardando a chegada de um pedido de conexao. Para que ela nao fique, devemos
       	    configurar o socket no modo sem bloqueio (nonblocking mode set). Neste exemplo ficaremos com o modo padrao (bloqueante)
         */ 
-//TODO        connected = accept(sock, (struct sockaddr *)&client_addr, &sin_size);
+        connected = accept(conListener->sock, (struct sockaddr *)&client_addr, &sin_size);
 //TODO        PRINTF("\NConexão aceita de (%s , %d)\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+        sleep(1);
     }
 }
