@@ -9,9 +9,10 @@
 #include <errno.h>
 
 #include "global.h"
-#include "connectionListener.h"
+#include "connections.h"
+#include "contact.h"
 
-int connectionListenerCreate(connectionListener *conListener, int port)
+int connections_listenerCreate(connectionListener *conListener, int port)
 {
     conListener = (connectionListener*)malloc( sizeof(connectionListener) );
     if(conListener = 0)
@@ -32,7 +33,7 @@ int connectionListenerCreate(connectionListener *conListener, int port)
     		6 - TCP - Transmission Control Protocol
     		17 - UDP - User Datagram Protocol	
    */ 
-   if ((conListener->sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+   if ((conListener->socketvar = socket(AF_INET, SOCK_STREAM, 0)) == -1)
    {
      perror("Error creating socket");
      return -2;
@@ -57,7 +58,7 @@ int connectionListenerCreate(connectionListener *conListener, int port)
    	mesmo endereco possa receber varias conexoes devemos alterar o valor da opcao SO_REUSEADDR para TRUE (1).
 
    */
-   if (setsockopt(conListener->sock, SOL_SOCKET, SO_REUSEADDR, &conListener->true,sizeof(int)) == -1)
+   if (setsockopt(conListener->socketvar, SOL_SOCKET, SO_REUSEADDR, &conListener->true,sizeof(int)) == -1)
    {
       perror("Error in Setsockopt");
       return -3;
@@ -81,7 +82,7 @@ int connectionListenerCreate(connectionListener *conListener, int port)
 
    	    A funcao bind retorna 0 em caso de sucesso e -1 em caso de erro
     */
-    if (bind(conListener->sock, (struct sockaddr *)&conListener->addr, sizeof(struct sockaddr)) == -1)
+    if (bind(conListener->socketvar, (struct sockaddr *)&conListener->addr, sizeof(struct sockaddr)) == -1)
     {
         perror("Impossible to bind");
         return -4;
@@ -99,7 +100,7 @@ int connectionListenerCreate(connectionListener *conListener, int port)
    	    Obs: Quando utilizamos o listen devemos utilizar a funcao accept que veremos mais adiante no codigo
 
     */
-    if (listen(conListener->sock, 10) == -1)
+    if (listen(conListener->socketvar, 10) == -1)
     {
         perror("Error in Listen");
         return -5;
@@ -108,7 +109,7 @@ int connectionListenerCreate(connectionListener *conListener, int port)
     return 0;
 }
 
-void *connectionListenerListen(void *data)
+void *connections_listen(void *data)
 {
     connectionListener *conListener = (connectionListener*)data;
 
@@ -133,8 +134,54 @@ void *connectionListenerListen(void *data)
       	    Obs: A funcao accept por padrão fica aguardando a chegada de um pedido de conexao. Para que ela nao fique, devemos
       	    configurar o socket no modo sem bloqueio (nonblocking mode set). Neste exemplo ficaremos com o modo padrao (bloqueante)
         */ 
-        connected = accept(conListener->sock, (struct sockaddr *)&client_addr, &sin_size);
-//TODO        PRINTF("\NConexão aceita de (%s , %d)\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+        connected = accept(conListener->socketvar, (struct sockaddr *)&client_addr, &sin_size);
+
+        contact *newContact;
+        char nickname[20];
+
+        //TODO receive nickname
+        contact_create(newContact, nickname, client_addr.sin_addr);
+        hash_addContact(newContact);
+
         sleep(1);
     }
+    
+    pthread_exit(0);
+}
+
+int connections_connect(contact *newContact, int port)
+{
+    struct hostent *host;
+    struct sockaddr_in server_addr;
+
+    if(newContact = 0)
+    {
+        perror("Contact not allocated");
+        return -1;
+    }
+
+    if(hash_retrieveContact(newContact->host_name) != 0)
+    {
+        perror("Hostname already connected");
+        return -2
+    }
+    
+    if ((newContact->socketvar = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+    {
+        perror("Error creating socket");
+        return -3;
+    }
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(port);
+    server_addr.sin_addr = *((struct in_addr *)host->h_addr);
+    bzero(&(server_addr.sin_zero),8);
+   
+    if (connect(newContact->socketvar, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)) == -1)
+    {
+        perror("Error during connect");
+        return -4;
+    }
+
+    return 0;
 }
