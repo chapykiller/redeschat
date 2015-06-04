@@ -6,8 +6,7 @@
 
 typedef struct sContact
 {
-    unsigned int id;
-    int ip;
+    char host_name[30];
     char nickname[20];
 
     int status;
@@ -15,5 +14,7 @@ typedef struct sContact
 
     int socketvar;
 } contact;
+
+int contact_create(contact *newContact, char *nickname, char *host_name, int newSocketvar);
 
 #endif
