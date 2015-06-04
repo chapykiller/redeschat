@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-I include/ -c
-SOURCES=connections.c main.c
+SOURCES=hashTable.c connections.c main.c
 OBJECTS=$(addprefix obj/, $(SOURCES:.c=.o))
 EXECUTABLE=Chat
 

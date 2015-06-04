@@ -11,6 +11,7 @@
 #include "global.h"
 #include "connections.h"
 #include "contact.h"
+#include "hashTable.h"
 
 int connections_listenerCreate(connectionListener *conListener, int port)
 {
@@ -140,8 +141,8 @@ void *connections_listen(void *data)
         char nickname[20];
 
         //TODO receive nickname
-        contact_create(newContact, nickname, client_addr.sin_addr);
-        hash_addContact(newContact);
+        if(contact_create(newContact, nickname, client_addr.sin_addr, connected) == 0)
+            hash_addContact(newContact);
 
         sleep(1);
     }
