@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-I include/ -c
-SOURCES=main.cpp
+SOURCES=connectionListener.c main.c
 OBJECTS=$(addprefix obj/, $(SOURCES:.c=.o))
 EXECUTABLE=Chat
 
