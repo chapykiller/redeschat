@@ -1,6 +1,8 @@
 #include <stdlib.h>
 
 #include "hashTable.h"
+#include "contact.h"
+#include "global.h"
 
 int cmp(char * s1, char * s2){
 	int i;
@@ -21,7 +23,7 @@ int getHash(char * key){
 			return -1;
 		}
 
-		hash = (hash * hashChar) % contactTable.tableSize;
+		hash = (hash * hashchar) % contactTable.tableSize;
 		hash = (hash + (key[i] - '.')) % contactTable.tableSize;
 	}
 
@@ -35,9 +37,9 @@ contact * hash_retrieveContact(char * key){
 
 	hashNode * current;
 
-	for(current = contactTable.table[hash]; current!=NULL; current = current.next){
-		if(cmp(key, current.key))
-			return current;
+	for(current = contactTable.table[hash]; current!=NULL; current = current->next){
+		if(cmp(key, current->key))
+			return current->nodeContact;
 	}
 
 	return NULL;
@@ -47,25 +49,25 @@ int hash_addContact(contact * newcontact, char * key){
 	int hash = getHash(key);
 
 	hashNode * newNode = (hashNode *)malloc(sizeof(hashNode));
-	hashNode.nodeContact = newcontact;
+	newNode->nodeContact = newcontact;
 	
 	int i, n;
 	for(n=0; key[n]!='\0'; n++);
 
-	hashNode.key = (char *)malloc(n*sizeof(char));
+	newNode->key = (char *)malloc(n*sizeof(char));
 
 	for(i=0; i<n; i++)
-		hashNode.key[i] = key[i];
+		newNode->key[i] = key[i];
 
-	hashNode.next = contactTable.table[hash];
-	contactTable.table[hash] = hashNode;
+	newNode->next = contactTable.table[hash];
+	contactTable.table[hash] = newNode;
 
 	return 0;
 }
 
 void hash_init(){
 	contactTable.tableSize = HASHTABLE_SIZE;
-	contactTable.table = (hashNode *)malloc(HASHTABLE_SIZE*sizeof(hashNode));
+	contactTable.table = (hashNode **)malloc(HASHTABLE_SIZE*sizeof(hashNode *));
 
 	int i;
 
