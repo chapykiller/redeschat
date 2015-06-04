@@ -1,4 +1,13 @@
+#include <stdlib.h>
+
 #include "hashTable.h"
+
+int cmp(char * s1, char * s2){
+	int i;
+
+	for(i=0; s1[i]!=s2[i] && s1[i]!='\0'; i++);
+	return s1[i]==s2[i];
+}
 
 int getHash(char * key){
 	int hash = 0;
@@ -22,12 +31,13 @@ int getHash(char * key){
 contact * hash_retrieveContact(char * key){
 	int hash = getHash(key);
 	if(hash == -1)
-		return -1;
+		return NULL;
 
 	hashNode * current;
 
 	for(current = contactTable.table[hash]; current!=NULL; current = current.next){
-		if(current.)
+		if(cmp(key, current.key))
+			return current;
 	}
 
 	return NULL;
