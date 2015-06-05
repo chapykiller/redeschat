@@ -146,7 +146,7 @@ void addContact(char * input, char seq[]){
 						contact * newContact = contact_create(hostname, nickname);
 
 						if(connections_connect(newContact, 48691) < 0){
-							printf("Failed to estabilish connection.");
+							printf("Failed to estabilish connection.%s", seq);
 						}
 					}
 				}
