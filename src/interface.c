@@ -80,7 +80,7 @@ void doMsg(char * input, char seq[]){
 	free(arg2);
 }
 
-void displayMessages(){
+void displayMessages(char * input, char seq[]){
 	char * arg1 = (char *)malloc(31*sizeof(char));
 	int r1 = sscanf(input, "%30s", arg1);
 

@@ -95,7 +95,7 @@ int hash_addContact(contact * newcontact, char * key){
 void hash_removeContact(char * key){
 	int hash = getHash(key);
 	if(hash == -1)
-		return NULL;
+		return;
 
 	hashNode * current;
 
@@ -117,7 +117,7 @@ void hash_removeContact(char * key){
 
 	}
 
-	return NULL;
+	return;
 }
 
 void hash_init(){
