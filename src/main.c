@@ -5,6 +5,7 @@
 #include "broadcast.h"
 #include "connections.h"
 #include "threadManagement.h"
+#include "hashTable.h"
 
 int main()
 {
@@ -13,8 +14,7 @@ int main()
     running = 1;
 
     thread_init();
-
-    pthread_mutex_init(&hashMutex, NULL);
+    hash_init();
 
     connections_listenerCreate(conListener, 2134);
 
@@ -22,8 +22,14 @@ int main()
     pthread_create(createThread(), 0, broadcast_alive, NULL);
 
 	threadNode *current;
+    threadNode *previous = NULL;
     for(current = threadList; current!=NULL; current = current->next){
-            pthread_join(*current->thread, NULL);
+        if(previous != NULL)
+            free(previous);
+
+        pthread_join(*current->thread, NULL);
+
+        previous = current;
     }
 
     free(conListener);

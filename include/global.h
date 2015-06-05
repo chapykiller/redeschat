@@ -12,6 +12,4 @@ hashTable contactTable;
 contact * contactList;
 threadNode * threadList;
 
-pthread_mutex_t hashMutex;
-
 #endif //_GLOBAL_H_
