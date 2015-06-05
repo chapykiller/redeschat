@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <jansson.h>
 
+#include "jsonxstr.h"
+
 char * validateJSON(char * arg, int * n){
 	int stacksize = 8;
 	int stackpos = -1;
