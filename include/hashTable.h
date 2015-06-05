@@ -14,6 +14,8 @@ int getHash(char * key);
 contact *hash_retrieveContact(char * key);
 int hash_addContact(contact * newcontact, char * key);
 
+void hash_removeContact(char * key);
+
 void hash_init();
 
 
