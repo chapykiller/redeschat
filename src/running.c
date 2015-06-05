@@ -25,3 +25,11 @@ int isRunning()
 
     return aux;
 }
+
+void stopRunning(){
+	pthread_mutex_lock(&runningMutex);
+
+	running = 0;
+
+	pthread_mutex_unlock(&runningMutex);
+}

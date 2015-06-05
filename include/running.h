@@ -10,4 +10,6 @@ void startRunning();
 
 int isRunning();
 
+void stopRunning();
+
 #endif //_RUNNING_H_

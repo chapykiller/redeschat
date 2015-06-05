@@ -38,10 +38,14 @@ contact * hash_retrieveContact(char * key){
 
 	hashNode * current;
 
+    pthread_mutex_lock(&hashMutex);
+
 	for(current = contactTable.table[hash]; current!=NULL; current = current->next){
 		if(cmp(key, current->key))
 			return current->nodeContact;
 	}
+
+	pthread_mutex_unlock(&hashMutex);
 
 	return NULL;
 }
@@ -60,9 +64,9 @@ int hash_addContact(contact * newcontact, char * key){
 	for(i=0; i<n; i++)
 		newNode->key[i] = key[i];
 
-	newNode->next = contactTable.table[hash];
-
     pthread_mutex_lock(&hashMutex);
+
+	newNode->next = contactTable.table[hash];
 
 	contactTable.table[hash] = newNode;
 
@@ -98,6 +102,8 @@ void hash_removeContact(char * key){
 
 	hashNode * current;
 
+    pthread_mutex_lock(&hashMutex);
+
 	for(current = contactTable.table[hash]; current!=NULL && current->next!=NULL; current = current->next){
 		if(cmp(key, current->next->key)){
 			hashNode * temp = current->next;
@@ -115,6 +121,8 @@ void hash_removeContact(char * key){
 		}
 
 	}
+
+    pthread_mutex_unlock(&hashMutex);
 
 	return;
 }

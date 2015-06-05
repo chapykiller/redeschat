@@ -25,6 +25,8 @@ int checkNickname(char * nick){
 void displayContacts(char seq[]){
 	contact * current;
 
+    pthread_mutex_lock(&hashMutex);
+
 	if(contactList != NULL){
 		int count = 0;
 
@@ -37,6 +39,8 @@ void displayContacts(char seq[]){
 	}else{
 		printf("Contact list is empty. :(%s", seq);
 	}
+
+    pthread_mutex_unlock(&hashMutex);
 
 	return;
 }
@@ -293,7 +297,7 @@ int interface_init(){
 
 					displayContacts(seq);
 				}else if(cmp(command, "/quit")){
-					running = 0;
+					stopRunning();
 				}else if(cmp(command, "/add")){
 					printf("\n");
 

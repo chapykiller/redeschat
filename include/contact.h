@@ -31,7 +31,7 @@ typedef struct sContact
     int references;
 
     messageNode * messages;
-    pthread_mutex_t messagemutex;
+    pthread_mutex_t messageMutex;
 
     int socketvar;
 } contact;
@@ -44,6 +44,7 @@ typedef struct contactNode{
 
 contact * contactList;
 contactNode * contactQueue;
+pthread_mutex_t queueMutex;
 
 contact * contact_create(const char *nickname, const char *host_name);
 void addMessage(contact * cont, const char * origin, char * message);

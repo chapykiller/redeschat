@@ -6,6 +6,8 @@
 #include "contact.h"
 
 void addMessage(contact * cont, const char * origin, char * message){
+	pthread_mutex_lock(&cont->messageMutex);
+
 	char * copy = (char *)malloc(553*sizeof(char));
 	strcpy(copy, origin);
 	strcat(copy, ": ");
@@ -42,30 +44,40 @@ void addMessage(contact * cont, const char * origin, char * message){
 		}
 	}
 
+	pthread_mutex_unlock(&cont->messageMutex);
+
 	return;
 }
 
 void queueContact(contact * host){
+	pthread_mutex_lock(&queueMutex);
+
 	contactNode * newNode = (contactNode *)malloc(sizeof(contactNode));
 	newNode->value = host;
 
 	newNode->next = contactQueue;
 
+	pthread_mutex_unlock(&queueMutex);
+
 	return;
 }
 
 contact * dequeueContact(){
-	if(contactQueue == NULL){
-		return NULL;
-	}else{
-		contact * ret = contactQueue->value;
+	pthread_mutex_lock(&queueMutex);
+
+	contact * ret = NULL;
+
+	if(contactQueue != NULL){
+		ret = contactQueue->value;
 		contactNode * temp = contactQueue;
 
 		contactQueue = contactQueue->next;
 		free(temp);
-
-		return ret;
 	}
+
+	pthread_mutex_unlock(&queueMutex);
+
+	return ret;
 }
 
 contact * contact_create(const char *nickname, const char *host_name)
@@ -84,12 +96,14 @@ contact * contact_create(const char *nickname, const char *host_name)
     ret->references = 0;
 
     ret->messages = NULL;
+    pthread_mutex_init(&ret->messageMutex, NULL);
 
     return ret;
 }
 
 void contact_init(){
 	contactQueue = NULL;
+	pthread_mutex_init(&queueMutex, NULL);
 
 	return;
 }
