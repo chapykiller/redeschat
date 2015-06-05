@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <errno.h>
 
 #include "hashTable.h"
 #include "contact.h"
@@ -62,6 +63,20 @@ int hash_addContact(contact * newcontact, char * key){
 	newNode->next = contactTable.table[hash];
 	contactTable.table[hash] = newNode;
 
+	if(contactList == NULL)
+		contactList = newcontact;
+
+		newcontact->next = NULL;
+		newcontact->prev = NULL;
+	else{
+		contactList->prev = newcontact;
+
+		newcontact->next = contactList;
+		newcontact->prev = NULL;
+
+		contactList = newcontact;
+	}
+
 	return 0;
 }
 
@@ -74,6 +89,8 @@ void hash_init(){
 	for(i=0; i<contactTable.tableSize; i++){
 		contactTable.table[i] = NULL;
 	}
+
+	contactList = NULL;
 
 	return;
 }

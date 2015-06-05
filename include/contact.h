@@ -12,6 +12,9 @@ typedef struct sContact
     int status;
     int lastUpdate;
 
+    contact * next;
+    contact * prev;
+
     int socketvar;
 } contact;
 
