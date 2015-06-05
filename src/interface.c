@@ -6,6 +6,7 @@
 #include "hashTable.h"
 #include "connections.h"
 #include "jsonxstr.h"
+#include "message.h"
 
 char messageTarget[31];
 

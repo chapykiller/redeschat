@@ -1,4 +1,5 @@
 #include <pthread.h>
+#include <stdlib.h>
 
 #include "global.h"
 #include "broadcast.h"
@@ -13,9 +14,9 @@ int main()
 
     pthread_mutex_init(&hashMutex, NULL);
 
-    connection_listenerCreate(conListener, /*TODO port*/);
+    connections_listenerCreate(conListener, 2134);
 
-    pthread_create(createThread(), 0, connection_listen, (void*)conListener);
+    pthread_create(createThread(), 0, connections_listen, (void*)conListener);
     pthread_create(createThread(), 0, broadcast_alive, NULL);
 
     free(conListener);
