@@ -23,7 +23,7 @@ int main()
 
 	threadNode *current;
     for(current = threadList; current!=NULL; current = current->next){
-            pthread_join(current->thread);
+            pthread_join(*current->thread, NULL);
     }
 
     free(conListener);
