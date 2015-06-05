@@ -132,5 +132,7 @@ void hash_init(){
 
 	contactList = NULL;
 
+    pthread_mutex_init(&hashMutex, NULL);
+
 	return;
 }

@@ -31,7 +31,7 @@ typedef struct sContact
     int references;
 
     messageNode * messages;
-    sem_t messagemutex;
+    pthread_mutex_t messagemutex;
 
     int socketvar;
 } contact;
