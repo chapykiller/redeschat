@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <errno.h>
 
 #include "hashTable.h"
@@ -63,11 +64,12 @@ int hash_addContact(contact * newcontact, char * key){
 	newNode->next = contactTable.table[hash];
 	contactTable.table[hash] = newNode;
 
-	if(contactList == NULL)
+	if(contactList == NULL){
 		contactList = newcontact;
 
 		newcontact->next = NULL;
 		newcontact->prev = NULL;
+    }
 	else{
 		contactList->prev = newcontact;
 

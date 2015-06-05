@@ -1,10 +1,13 @@
+#include <stdlib.h>
+#include <stdio.h>
 
+#include "global.h"
 
 int interface_init(){
 	char * input = (char *)malloc(256*sizeof(char));
 	int i;
 
-	printf("Yet Another P2P Chat (YAPC)\n")
+	printf("Yet Another P2P Chat (YAPC)\n");
 
 	while(running){
 		fgets(input, 256, stdin);

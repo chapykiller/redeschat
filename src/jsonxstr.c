@@ -1,4 +1,6 @@
 #include <stdlib.h>
+#include <errno.h>
+#include <stdio.h>
 
 char * validateJSON(char * arg, int * n){
 	int stacksize = 8;

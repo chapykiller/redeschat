@@ -7,7 +7,9 @@
 
 #define isValid(c) ( ('0' <= (int)c && (int)c <= '9') || c=='.' || ('A' <= (int)c && (int)c <= 'Z') || ('a' <= (int)c && (int)c <= 'z') )
 
-contact * retrieveContact(char * key);
+contact *hash_retrieveContact(char * key);
+
+int hash_addContact(contact * newcontact, char * key);
 
 struct sHashNode;
 

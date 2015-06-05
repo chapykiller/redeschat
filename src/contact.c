@@ -1,3 +1,8 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <errno.h>
+#include <string.h>
+
 #include "contact.h"
 
 int contact_create(contact *newContact, char *nickname, char *host_name, int newSocketvar)

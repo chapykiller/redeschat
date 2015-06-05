@@ -149,7 +149,10 @@ void *connections_listen(void *data)
         inet_ntop(AF_INET, &(client_addr.sin_addr), host_name, INET_ADDRSTRLEN);
 
         if(contact_create(newContact, nickname, host_name, connected) == 0)
-            hash_addContact(newContact);
+        {
+            hash_addContact(newContact, newContact->nickname);
+            hash_addContact(newContact, newContact->host_name);
+        }
 
         sleep(1);
     }
