@@ -19,10 +19,8 @@ int getHash(char * key){
 	int hashchar = 'z' - '.' + 1;
 
 	for(i=0; key[i]!='\0'; i++){
-		if(!isValid(key[i])){
-			perror("INVALID HASH KEY!");
+		if(!isValid(key[i]))
 			return -1;
-		}
 
 		hash = (hash * hashchar) % contactTable.tableSize;
 		hash = (hash + (key[i] - '.')) % contactTable.tableSize;
@@ -107,16 +105,12 @@ void hash_removeContact(char * key){
 		if(cmp(key, current->next->key)){
 			hashNode * temp = current->next;
 
-            pthread_mutex_lock(&hashMutex);
-
 			current->next = current->next->next;
 
 			if(temp->nodeContact->references-- == 0){
 				free(temp->nodeContact);
 			}
 			free(temp);
-            
-            pthread_mutex_unlock(&hashMutex);
 		}
 
 	}

@@ -18,6 +18,15 @@ void broadcast_send(char *message)
 	}
 }
 
+void broadcast_dead()
+{
+    char *deadMessage = makeJSONControl(1);
+
+    broadcast_send(deadMessage);
+
+    free(deadMessage);
+}
+
 void *broadcast_alive(void *data)
 {
     time_t last_update;

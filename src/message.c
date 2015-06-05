@@ -115,7 +115,7 @@ void *message_receive(void *data)
                         aux_recvData = cat_message + strlen(cat_message);
 
                     // Transforma a mensagem json em uma mensagem normal
-                    decodeJSON(json_message);
+                    decodeJSON(json_message, sender);
 
                     free(json_message);
                 }

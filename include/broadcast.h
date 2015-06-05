@@ -2,6 +2,7 @@
 #define _BROADCAST_H_
 
 void broadcast_send(char *message);
+void broadcast_dead();
 
 void *broadcast_alive(void *data);
 
