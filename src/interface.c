@@ -55,7 +55,7 @@ char ** decompose(char * str, int * args){
 			if(reading == 0){
 				narg++;
 
-				for(j=i; str[j]!='\n' && str[j]!= '\0' && str[j]!=' '; j++)
+				for(j=i, size=0; str[j]!='\n' && str[j]!= '\0' && str[j]!=' '; j++)
 					size++;
 
 				ret[current] = (char *)malloc((size+1)*sizeof(char));
