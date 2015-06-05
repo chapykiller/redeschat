@@ -1,9 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "global.h"
 #include "hashTable.h"
 #include "connections.h"
+#include "jsonxstr.h"
 
 char messageTarget[31];
 
@@ -63,7 +65,7 @@ void doMsg(char * input, char seq[]){
 				printf("Contact is down. Oh well.%s", seq);
 			else{
 				if(r2 == EOF){
-					strcpy(messageTarget, target);
+					strcpy(messageTarget, arg1);
 				}else{
 					char * json_msg = makeJSONMessage(arg2);
 					message_send(target, json_msg);
@@ -79,12 +81,12 @@ void doMsg(char * input, char seq[]){
 int interface_init(){
 	int i;
 
-	char[] seq = "\n\n\t> ";
+	char seq[] = "\n\n\t> ";
 
 	printf("/tYet Another P2P Chat (YAPC)\n");
 	printf("\nType /help if you need help.%s", seq);
 
-	messageTarget = "";
+	messageTarget[0] = '\0';
 
 	while(running){
 		char * input = (char *)malloc(512*sizeof(char));
@@ -123,17 +125,17 @@ int interface_init(){
 				}else if(cmp(command, "/list")){
 					printf("\n");
 
-					displayContacts();
+					displayContacts(seq);
 				}else if(cmp(command, "/quit")){
 					running = 0;
 				}else if(cmp(command, "/add")){
 					printf("\n");
 
-					addContact(input);
+					addContact(input, seq);
 				}else if(cmp(command, "/msg")){
 					printf("\n");
 
-					doMsg(input);
+					doMsg(input, seq);
 				}else if(cmp(command, "/msg")){
 
 				}else if(cmp(command, "/msg")){
@@ -166,6 +168,6 @@ int interface_init(){
 			}
 		}
 
-		free(input)
+		free(input);
 	}
 }
