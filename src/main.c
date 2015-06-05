@@ -18,7 +18,7 @@ int main()
     thread_init();
     hash_init();
 
-    connections_listenerCreate(&conListener, 2134);
+    connections_listenerCreate(&conListener, 48691);
 
     pthread_create(createThread(), 0, connections_listen, (void*)conListener);
     pthread_create(createThread(), 0, broadcast_alive, NULL);
