@@ -15,6 +15,9 @@
 #include "contact.h"
 #include "hashTable.h"
 
+/*
+ * Aloca e inicializa uma struct usada para ouvir por conexões
+*/
 int connections_listenerCreate(connectionListener *conListener, int port)
 {
     conListener = (connectionListener*)malloc( sizeof(connectionListener) );
@@ -24,18 +27,14 @@ int connections_listenerCreate(connectionListener *conListener, int port)
         return -1;
     }
 
+    // Coloca o timeout do recv como 1 segundo
     conListener->timev.tv_sec = 1;
     conListener->timev.tv_usec = 0;
 
    /* Funcao socket(sin_family,socket_type,protocol_number) retorna um inteiro (socket descriptor), caso erro retorna -1
    
-      O numero do protocolo (protocol_number) pode ser algum dos seguintes:
+      O numero do protocolo (protocol_number):
    		0 - IP - Internet Protocol (Default)
-    		1 - ICMP - Internet Control Message Protocol
-    		2 - IGMP - Internet Group Multicast Protocol
-    		3 - GGP - Gateway-Gateway Protocol
-    		6 - TCP - Transmission Control Protocol
-    		17 - UDP - User Datagram Protocol	
    */ 
    if ((conListener->socketvar = socket(AF_INET, SOCK_STREAM, 0)) == -1)
    {
@@ -49,17 +48,13 @@ int connections_listenerCreate(connectionListener *conListener, int port)
 	
 	int socket = descriptor do socket
    	
-	int level = nivel da camada do protocolo (SOL_SOCKET = Constante de nivel para o socket, outros: IPPROTO_IP, IPPROTO_TCP, IPPROTO_UDP)
+	int level = nivel da camada do protocolo (SOL_SOCKET = Constante de nivel para o socket)
    	
 	int optname = Opcao desejada para a alteracao
    
 	optval = valor da opcao
    
 	optlen = tamanho do valor
-
-  	Neste exemplo iremos alterar o valor no nivel de socket para a opcao SO_REUSEADDR. Por default um socket criado aceita apenas
-   	uma conexao por endereco, ou seja o valor de SO_REUSEADDR é igual FALSE (0). Para alterar esse valor e permitirmos que o
-   	mesmo endereco possa receber varias conexoes devemos alterar o valor da opcao SO_REUSEADDR para TRUE (1).
 
    */
    if (setsockopt(conListener->socketvar, SOL_SOCKET, SO_REUSEADDR, (char*)&conListener->timev,sizeof(struct timeval)) == -1)
@@ -92,7 +87,7 @@ int connections_listenerCreate(connectionListener *conListener, int port)
         return -4;
     }
 
-    /* Como estamos criando um servidor que ira receber solicitacoes este socket deve ficar "ouvindo" (aguardando conexoes) na
+    /* Como estamos criando um listener que ira receber solicitacoes este socket deve ficar aguardando conexoes na
          porta especificada. A funcao listen realiza essa tarefa.
 
    	    Funcao listen(int socket, unsigned int n) onde;
@@ -101,8 +96,6 @@ int connections_listenerCreate(connectionListener *conListener, int port)
 
    	    unsigned int n = tamanho da fila de conexoes pendentes
    
-   	    Obs: Quando utilizamos o listen devemos utilizar a funcao accept que veremos mais adiante no codigo
-
     */
     if (listen(conListener->socketvar, 10) == -1)
     {
@@ -113,14 +106,20 @@ int connections_listenerCreate(connectionListener *conListener, int port)
     return 0;
 }
 
+/*
+ * Thread responsavel por ficar aguardando novas conexoes
+*/
 void *connections_listen(void *data)
 {
     connectionListener *conListener = (connectionListener*)data;
 
+    // Representa o novo contato conectando
     struct sockaddr_in client_addr;
     int sin_size;
+    // Socket criada para essa conexao
     int connected;
     
+    // Enquanto o programa nao for fechado
     while(running)
     {
         // Variavel para armazenar o tamanho de endereco do cliente conectado
@@ -134,24 +133,28 @@ void *connections_listen(void *data)
 	        struct sockaddr*addr = endereco de destino (cliente)
       
 	        size_t*length_ptr = tamanho do endereco de destino
-
-      	    Obs: A funcao accept por padrão fica aguardando a chegada de um pedido de conexao. Para que ela nao fique, devemos
-      	    configurar o socket no modo sem bloqueio (nonblocking mode set). Neste exemplo ficaremos com o modo padrao (bloqueante)
         */ 
         connected = accept(conListener->socketvar, (struct sockaddr *)&client_addr, &sin_size);
 
+        // Representa o contato que acabou de conectar
         contact *newContact;
-        char nickname[20];
+        // IP ou endereco desse contato
         char host_name[30];
 
-        //TODO receive nickname
-        
+        // Salva o host_name do contato
         inet_ntop(AF_INET, &(client_addr.sin_addr), host_name, INET_ADDRSTRLEN);
 
-        if(contact_create(newContact, nickname, host_name, connected) == 0)
+        // Aloca e atribui os valores em newContact
+        newContact = contact_create("", host_name);
+        if(newContact != NULL)
         {
-            hash_addContact(newContact, newContact->nickname);
+            // Adiciona o contato na tabela hash usando host_name como chave
             hash_addContact(newContact, newContact->host_name);
+
+            // Atribui o socket
+            newContact->socketvar = connected;
+
+            //TODO adiciona para a lista ligada
         }
 
         sleep(1);
@@ -160,9 +163,14 @@ void *connections_listen(void *data)
     pthread_exit(0);
 }
 
+/*
+ * Conecta em um outro computador na rede
+*/
 int connections_connect(contact *newContact, int port)
 {
+    // Representa o host
     struct hostent *host;
+    // Representa o nó atual
     struct sockaddr_in server_addr;
 
     if(newContact = 0)
@@ -171,25 +179,30 @@ int connections_connect(contact *newContact, int port)
         return -1;
     }
 
+    // Se esse IP ja esta na lista, nao permite uma nova conexao
     if(hash_retrieveContact(newContact->host_name) != 0)
     {
         perror("Hostname already connected");
         return -2;
     }
     
+    // Obtem o host a partir de host_name
     host = gethostbyname(newContact->host_name);
     
+    // Cria a socket
     if ((newContact->socketvar = socket(AF_INET, SOCK_STREAM, 0)) == -1)
     {
         perror("Error creating socket");
         return -3;
     }
 
+    // Atribui as configurações necessarias
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(port);
     server_addr.sin_addr = *((struct in_addr *)host->h_addr);
     bzero(&(server_addr.sin_zero),8);
-   
+  
+    // Tenta conectar com o contato
     if (connect(newContact->socketvar, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)) == -1)
     {
         perror("Error during connect");
