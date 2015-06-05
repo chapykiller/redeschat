@@ -1,4 +1,6 @@
 #include <unistd.h>
+#include <time.h>
+#include <stdlib.h>
 
 #include "broadcast.h"
 #include "message.h"
@@ -18,13 +20,23 @@ void broadcast_send(char *message)
 
 void *broadcast_alive(void *data)
 {
+    time_t last_update;
+
     char *aliveMessage = makeJSONMessage(0);
+
+    time(&last_update);
 
     while(running)
     {
+        if( (time(NULL) - last_update) >= 30)
         broadcast_send(aliveMessage);
-        sleep(30);
+
+        time(&last_update);
+
+        sleep(1);
     }
+
+    free(aliveMessage);
 
     pthread_exit(0);
 }

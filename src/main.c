@@ -7,6 +7,7 @@
 #include "threadManagement.h"
 #include "hashTable.h"
 #include "interface.h"
+#include <unistd.h>
 
 int main()
 {
@@ -28,14 +29,20 @@ int main()
     threadNode *previous = NULL;
     for(current = threadList; current!=NULL; current = current->next){
         if(previous != NULL)
+        {
+            free(previous->thread);
             free(previous);
+        }
 
         pthread_join(*current->thread, NULL);
 
         previous = current;
     }
     if(previous != NULL)
+    {
+        free(previous->thread);
         free(previous);
+    }
 
     free(conListener);
 

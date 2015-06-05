@@ -86,7 +86,11 @@ char * makeJSONMessage(char * string){
 	json_array_append_new(array, type_j);
 	json_array_append_new(array, messageType_j);
 
-	return json_dumps(array, 0);
+	char *message = json_dumps(array, 0);
+
+    json_decref(array);
+
+    return message;
 }
 
 char * makeJSONControl(int id){
@@ -98,7 +102,11 @@ char * makeJSONControl(int id){
 	json_array_append_new(array, type_j);
 	json_array_append_new(array, controlType_j);
 
-	return json_dumps(array, 0);
+	char* control = json_dumps(array, 0);
+
+    json_decref(array);
+
+    return control;
 }
 
 void decodeJSON(char * message){
