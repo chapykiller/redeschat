@@ -4,7 +4,6 @@
 #include <string.h>
 
 #include "contact.h"
-#include "global.h"
 
 void addMessage(contact * cont, const char * origin, char * message){
 	char * copy = (char *)malloc(553*sizeof(char));

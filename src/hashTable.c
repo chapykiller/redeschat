@@ -4,7 +4,6 @@
 
 #include "hashTable.h"
 #include "contact.h"
-#include "global.h"
 
 int cmp(const char * s1, const char * s2){
 	int i;

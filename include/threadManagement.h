@@ -3,6 +3,7 @@
 
 #include <pthread.h>
 
+threadNode * threadList;
 struct threadNode;
 
 typedef struct threadNode{

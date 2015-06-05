@@ -5,7 +5,7 @@
 #include "broadcast.h"
 #include "message.h"
 #include "contact.h"
-#include "global.h"
+#include "running.h"
 #include "jsonxstr.h"
 
 void broadcast_send(char *message)
@@ -26,7 +26,7 @@ void *broadcast_alive(void *data)
 
     time(&last_update);
 
-    while(running)
+    while(isRunning())
     {
         if( (time(NULL) - last_update) >= 30)
         broadcast_send(aliveMessage);

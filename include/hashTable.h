@@ -8,6 +8,7 @@
 #define isValid(c) ( ('0' <= (int)c && (int)c <= '9') || c=='.' || ('A' <= (int)c && (int)c <= 'Z') || ('a' <= (int)c && (int)c <= 'z') )
 #define isValidNick(c) ( ('0' <= (int)c && (int)c <= '9') || ('A' <= (int)c && (int)c <= 'Z') || ('a' <= (int)c && (int)c <= 'z') )
 
+hashTable contactTable;
 pthread_mutex_t hashMutex;
 
 int cmp(const char * s1, const char * s2);

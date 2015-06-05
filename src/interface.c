@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "global.h"
+#include "running.h"
 #include "hashTable.h"
 #include "connections.h"
 #include "jsonxstr.h"
@@ -198,7 +198,7 @@ int interface_init(){
 
 	messageTarget[0] = '\0';
 
-	while(running){
+	while(isRunning()){
 		char * input = (char *)malloc(512*sizeof(char));
 		fgets(input, 512, stdin);
 

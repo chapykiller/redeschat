@@ -9,7 +9,7 @@
 
 #include "contact.h"
 #include "message.h"
-#include "global.h"
+#include "running.h"
 #include "jsonxstr.h"
 
 /*
@@ -53,7 +53,7 @@ void *message_receive(void *data)
     cat_message[0] = '\0';
 
     // Enquanto o programa nao for fechado
-    while(running)
+    while(isRunning())
     {
         // Fecha o socket e finaliza o thread se o contato estiver desconectado
         if(sender->status == STATUS_DEAD)

@@ -11,7 +11,7 @@
 #include <errno.h>
 #include <pthread.h>
 
-#include "global.h"
+#include "running.h"
 #include "connections.h"
 #include "contact.h"
 #include "hashTable.h"
@@ -130,7 +130,7 @@ void *connections_listen(void *data)
     FD_SET(conListener->socketvar, &listener_fd_set);
 
     // Enquanto o programa nao for fechado
-    while(running)
+    while(isRunning())
     {
         // Variavel para armazenar o tamanho de endereco do cliente conectado
         sin_size = sizeof(struct sockaddr_in);
@@ -196,38 +196,14 @@ int connections_connect(contact *newContact, int port)
         return -1;
     }
 
-    // Se esse IP ja esta na lista, verifica se ainda esta conectado
-    contact *aux_Contact = hash_retrieveContact(newContact->host_name);
-    if(aux_Contact != NULL)
-    {
-        // Se estiver desconectado, tira da tabela hash
-        if(aux_Contact->status == STATUS_DEAD)
-            hash_removeContact(aux_Contact->host_name);
-        // Se estiver conectado, apresenta erro
-        else
-        {
-            perror("Hostname already connected");
-            return -2;
-        }
-    }
-
-    // Se esse nickname ja esta na lista, verifica se ainda esta conectado
-    aux_Contact = hash_retrieveContact(newContact->nickname);
-    if(aux_Contact != NULL)
-    {
-        // Se estiver desconectado, tira da tabela hash
-        if(aux_Contact->status == STATUS_DEAD)
-            hash_removeContact(aux_Contact->nickname);
-        // Se estiver conectado, apresenta erro
-        else
-        {
-            perror("Nickname already in use");
-            return -3;
-        }
-    }
-
     // Obtem o host a partir de host_name
     host = gethostbyname(newContact->host_name);
+    if(host == NULL)
+    {
+        perror("Invalid hostname");
+        return -2;
+    }
+
 
     // Coloca o timeout do recv como 1 segundo
     struct timeval timev;
@@ -238,13 +214,13 @@ int connections_connect(contact *newContact, int port)
     if ((newContact->socketvar = socket(AF_INET, SOCK_STREAM, 0)) == -1)
     {
         perror("Error creating socket");
-        return -4;
+        return -3;
     }
 
     if (setsockopt(newContact->socketvar, SOL_SOCKET, SO_RCVTIMEO, (char*)&timev, sizeof(struct timeval)) == -1)
     {
         perror("Error in Setsockopt");
-        return -5;
+        return -4;
     }
 
     // Atribui as configurações necessarias
@@ -257,7 +233,7 @@ int connections_connect(contact *newContact, int port)
     if (connect(newContact->socketvar, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)) == -1)
     {
         perror("Error during connect");
-        return -6;
+        return -5;
     }
 
     pthread_create(createThread(), 0, message_receive, (void*)newContact);

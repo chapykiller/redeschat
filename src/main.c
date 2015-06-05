@@ -1,7 +1,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 
-#include "global.h"
+#include "running.h"
 #include "broadcast.h"
 #include "connections.h"
 #include "threadManagement.h"
@@ -13,7 +13,7 @@ int main()
 {
     connectionListener *conListener = NULL;
 
-    running = 1;
+    startRunning();
 
     thread_init();
     hash_init();
