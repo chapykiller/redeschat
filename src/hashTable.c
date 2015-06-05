@@ -108,16 +108,12 @@ void hash_removeContact(char * key){
 		if(cmp(key, current->next->key)){
 			hashNode * temp = current->next;
 
-            pthread_mutex_lock(&hashMutex);
-
 			current->next = current->next->next;
 
 			if(temp->nodeContact->references-- == 0){
 				free(temp->nodeContact);
 			}
 			free(temp);
-            
-            pthread_mutex_unlock(&hashMutex);
 		}
 
 	}
