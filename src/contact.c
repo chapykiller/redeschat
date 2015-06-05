@@ -107,3 +107,15 @@ void contact_init(){
 
 	return;
 }
+
+void contact_exit(){
+    contact *temp = dequeueContact();
+    while(temp != NULL)
+    {
+        pthread_mutex_destroy(&temp->messageMutex);
+        free(temp);
+
+        temp = dequeueContact();
+    }
+    pthread_mutex_destroy(&queueMutex);
+}

@@ -53,5 +53,6 @@ void queueContact(contact * host);
 contact * dequeueContact();
 
 void contact_init();
+void contact_exit();
 
 #endif

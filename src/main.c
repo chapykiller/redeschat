@@ -17,6 +17,7 @@ int main()
 
     thread_init();
     hash_init();
+    contact_init();
 
     connections_listenerCreate(&conListener, 48691);
 
@@ -45,6 +46,7 @@ int main()
     }
 
     free(conListener);
+    contact_exit();
     hash_exit();
 
     return 0;

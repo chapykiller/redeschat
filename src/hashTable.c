@@ -1,144 +1,219 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include "hashTable.h"
 #include "contact.h"
 
-int cmp(const char * s1, const char * s2){
-	int i;
+int cmp(const char * s1, const char * s2)
+{
+    int i;
 
-	for(i=0; s1[i]==s2[i] && s1[i]!='\0'; i++);
-	return s1[i]==s2[i];
+    for(i=0; s1[i]==s2[i] && s1[i]!='\0'; i++);
+    return s1[i]==s2[i];
 }
 
-int getHash(char * key){
-	int hash = 0;
-	int i;
+int getHash(char * key)
+{
+    int hash = 0;
+    int i;
 
-	int hashchar = 'z' - '.' + 1;
+    int hashchar = 'z' - '.' + 1;
 
-	for(i=0; key[i]!='\0'; i++){
-		if(!isValid(key[i]))
-			return -1;
-
-		hash = (hash * hashchar) % contactTable.tableSize;
-		hash = (hash + (key[i] - '.')) % contactTable.tableSize;
-	}
-
-	return hash;
-}
-
-contact * hash_retrieveContact(char * key){
-	int hash = getHash(key);
-	if(hash == -1)
-		return NULL;
-
-	hashNode * current;
-
-    pthread_mutex_lock(&hashMutex);
-
-	for(current = contactTable.table[hash]; current!=NULL; current = current->next){
-		if(cmp(key, current->key))
-			return current->nodeContact;
-	}
-
-	pthread_mutex_unlock(&hashMutex);
-
-	return NULL;
-}
-
-int hash_addContact(contact * newcontact, char * key){
-	int hash = getHash(key);
-
-	hashNode * newNode = (hashNode *)malloc(sizeof(hashNode));
-	newNode->nodeContact = newcontact;
-	
-	int i, n;
-	for(n=0; key[n]!='\0'; n++);
-
-	newNode->key = (char *)malloc(n*sizeof(char));
-
-	for(i=0; i<n; i++)
-		newNode->key[i] = key[i];
-
-    pthread_mutex_lock(&hashMutex);
-
-	newNode->next = contactTable.table[hash];
-	contactTable.table[hash] = newNode;
-
-	if(newcontact->references == 0)
+    for(i=0; key[i]!='\0'; i++)
     {
-		if(contactList == NULL){
-			contactList = newcontact;
+        if(!isValid(key[i]))
+            return -1;
 
-			newcontact->next = NULL;
-			newcontact->prev = NULL;
-		}
-		else{
-			contactList->prev = newcontact;
+        hash = (hash * hashchar) % contactTable.tableSize;
+        hash = (hash + (key[i] - '.')) % contactTable.tableSize;
+    }
 
-			newcontact->next = contactList;
-			newcontact->prev = NULL;
-
-			contactList = newcontact;
-		}
-	}
-
-	newcontact->references++;
-
-    pthread_mutex_unlock(&hashMutex);
-
-	return 0;
+    return hash;
 }
 
-void hash_removeContact(char * key){
-	int hash = getHash(key);
-	if(hash == -1)
-		return;
+contact * hash_retrieveContact(char * key)
+{
+    int hash = getHash(key);
+    if(hash == -1)
+        return NULL;
 
-	hashNode * current;
+    hashNode * current;
 
     pthread_mutex_lock(&hashMutex);
 
-	for(current = contactTable.table[hash]; current!=NULL && current->next!=NULL; current = current->next){
-		if(cmp(key, current->next->key)){
-			hashNode * temp = current->next;
-
-			current->next = current->next->next;
-
-			if(temp->nodeContact->references-- == 0){
-				free(temp->nodeContact);
-			}
-			free(temp);
-		}
-
-	}
+    for(current = contactTable.table[hash]; current!=NULL; current = current->next)
+    {
+        if(cmp(key, current->key))
+            return current->nodeContact;
+    }
 
     pthread_mutex_unlock(&hashMutex);
 
-	return;
+    return NULL;
 }
 
-void hash_init(){
-	contactTable.tableSize = HASHTABLE_SIZE;
-	contactTable.table = (hashNode **)malloc(HASHTABLE_SIZE*sizeof(hashNode *));
+int hash_addContact(contact * newcontact, char * key)
+{
+    int hash = getHash(key);
 
-	int i;
+    hashNode * newNode = (hashNode *)malloc(sizeof(hashNode));
+    newNode->nodeContact = newcontact;
 
-	for(i=0; i<contactTable.tableSize; i++){
-		contactTable.table[i] = NULL;
-	}
+    int i, n;
+    for(n=0; key[n]!='\0'; n++);
 
-	contactList = NULL;
+    newNode->key = (char *)malloc(n*sizeof(char));
+
+    for(i=0; i<n; i++)
+        newNode->key[i] = key[i];
+
+    pthread_mutex_lock(&hashMutex);
+
+    newNode->next = contactTable.table[hash];
+    contactTable.table[hash] = newNode;
+
+    if(newcontact->references == 0)
+    {
+        if(contactList == NULL)
+        {
+            contactList = newcontact;
+
+            newcontact->next = NULL;
+            newcontact->prev = NULL;
+        }
+        else
+        {
+            contactList->prev = newcontact;
+
+            newcontact->next = contactList;
+            newcontact->prev = NULL;
+
+            contactList = newcontact;
+        }
+    }
+
+    newcontact->references++;
+
+    pthread_mutex_unlock(&hashMutex);
+
+    return 0;
+}
+
+void hash_removeContact(char * key)
+{
+    int hash = getHash(key);
+    if(hash == -1)
+        return;
+
+    hashNode * current;
+
+    pthread_mutex_lock(&hashMutex);
+
+    for(current = contactTable.table[hash]; current!=NULL && current->next!=NULL; current = current->next)
+    {
+        if(cmp(key, current->next->key))
+        {
+            hashNode * temp = current->next;
+
+            current->next = current->next->next;
+
+            if(temp->nodeContact->references-- == 0)
+            {
+                free(temp->nodeContact);
+            }
+            free(temp);
+        }
+
+    }
+
+    pthread_mutex_unlock(&hashMutex);
+
+    return;
+}
+
+void hash_init()
+{
+    contactTable.tableSize = HASHTABLE_SIZE;
+    contactTable.table = (hashNode **)malloc(HASHTABLE_SIZE*sizeof(hashNode *));
+
+    int i;
+
+    for(i=0; i<contactTable.tableSize; i++)
+    {
+        contactTable.table[i] = NULL;
+    }
+
+    contactList = NULL;
 
     pthread_mutex_init(&hashMutex, NULL);
 
-	return;
+    return;
 }
 
-void hash_exit(){
-	free(contactTable.table);
+void hash_exit()
+{
+    contact *current;
+    contact *previous = NULL;
+    for(current = contactList; current!=NULL; current = current->next)
+    {
+        if(previous != NULL)
+        {
+            if(previous->status == STATUS_ALIVE)
+                close(previous->socketvar);
+        }
 
-	return;
+        previous = current;
+
+        messageNode *msgcurrent;
+        messageNode *msgprevious = NULL;
+        for(msgcurrent = current->messages; msgcurrent!=NULL; msgcurrent = msgcurrent->next)
+        {
+            if(msgprevious != NULL)
+            {
+                free(msgprevious->message);
+                free(msgprevious);
+            }
+
+            msgprevious = msgcurrent;
+        }
+
+        if(msgprevious != NULL)
+        {
+            free(msgprevious->message);
+            free(msgprevious);
+        }
+    }
+    if(previous != NULL)
+    {
+        if(previous->status == STATUS_ALIVE)
+            close(previous->socketvar);
+
+        pthread_mutex_destroy(&previous->messageMutex);
+        free(previous);
+    }
+
+    hashNode *hashcurrent;
+    hashNode *hashprevious = NULL;
+    for(hashcurrent = *contactTable.table; hashcurrent!=NULL; hashcurrent = hashcurrent->next)
+    {
+        if(hashprevious != NULL)
+        {
+            free(hashprevious);
+        }
+
+        hashprevious = hashcurrent;
+    }
+
+    if(hashprevious != NULL)
+    {
+        free(hashprevious);
+    }
+
+    free(contactTable.table);
+
+    pthread_mutex_destroy(&hashMutex);
+
+    return;
 }

@@ -97,7 +97,10 @@ void displayContacts(char seq[]){
 
 		for(current = contactList; current!=NULL; current = current->next){
 			if(current->status == STATUS_ALIVE)
+            {
 				printf(" - %s > %s\n", current->host_name, current->nickname);
+				count++;
+            }
 		}
 
 		printf("\nListed a total of %d contacts.%s", count, seq);
@@ -149,6 +152,13 @@ void addContact(char * input, char seq[]){
 						if(connections_connect(newContact, 48691) < 0){
 							printf("Failed to estabilish connection.%s", seq);
 						}
+						else
+                        {
+                            hash_addContact(newContact, nickname);
+                            hash_addContact(newContact, hostname);
+
+                            printf("Contact added to the friend list.%s", seq);
+                        }
 					}
 				}
 			}
@@ -182,11 +192,14 @@ void doMsg(char * input, char seq[]){
 			else{
 				if(narg == 2){
 					strcpy(messageTarget, arg1);
+					printf("%s", seq);
 				}else{
 					addMessage(target, "You", arg2);
 
 					char * json_msg = makeJSONMessage(arg2);
 					message_send(target, json_msg);
+
+					printf("%s", seq);
 				}
 			}
 		}
