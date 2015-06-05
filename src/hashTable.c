@@ -6,7 +6,7 @@
 #include "contact.h"
 #include "global.h"
 
-int cmp(char * s1, char * s2){
+int cmp(const char * s1, const char * s2){
 	int i;
 
 	for(i=0; s1[i]!=s2[i] && s1[i]!='\0'; i++);
