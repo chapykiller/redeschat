@@ -54,11 +54,56 @@ void addContact(char * input, char seq[]){
 		if(!checkNickname(nickname)){
 			printf("Nickname cotains illegal characters. Please use only letters and numbers.%s", seq);
 		}else{
-			contact * newContact = contact_create(hostname, nickname);
+			contact * contact_by_host = hash_retrieveContact(hostname);
+			contact * contact_by_nick = hash_retrieveContact(nickname);
 
-			connections_connect(newContact, 4869);
+			if(contact_by_host != NULL && contact_by_host->status == STATUS_ALIVE){
+				printf("A contact with this hostname already exists.%s", seq);
+			}else{
+				if(contact_by_nick != NULL && contact_by_nick->status == STATUS_ALIVE){
+					printf("A contact with this nickname already exists.%s", seq);
+				}else{
+					if(contact_by_nick != NULL)
+						hash_removeContact(nickname);
+					if(contact_by_host != NULL)
+						hash_removeContact(hostname);
+
+					contact * newContact = contact_create(hostname, nickname);
+
+					connections_connect(newContact, 4869);
+				}
+			}
 		}
 	}
+
+	    contact *aux_Contact = hash_retrieveContact(newContact->host_name);
+    if(aux_Contact != NULL)
+    {
+        // Se estiver desconectado, tira da tabela hash
+        if(aux_Contact->status == STATUS_DEAD)
+            hash_removeContact(aux_Contact->host_name);
+        // Se estiver conectado, apresenta erro
+        else
+        {
+            perror("Hostname already connected");
+            return -2;
+        }
+    }
+
+    // Se esse nickname ja esta na lista, verifica se ainda esta conectado
+    aux_Contact = hash_retrieveContact(newContact->nickname);
+    if(aux_Contact != NULL)
+    {
+        // Se estiver desconectado, tira da tabela hash
+        if(aux_Contact->status == STATUS_DEAD)
+            hash_removeContact(aux_Contact->nickname);
+        // Se estiver conectado, apresenta erro
+        else
+        {
+            perror("Nickname already in use");
+            return -3;
+        }
+    }
 
 	free(hostname);
 	free(nickname);
@@ -154,12 +199,20 @@ int processInboundConnections(contact * var){
 				if(!checkNickname(nickname)){
 					printf("Nickname cotains illegal characters. Please use only letters and numbers.");
 				}else{
-					valid = 1;
-					strcpy(var->nickname, nickname);
+					contact * contact_by_nick = hash_retrieveContact(nickname);
+
+					if(contact_by_nick != NULL && contact_by_nick->status == STATUS_ALIVE){
+						printf("A contact with this name already exists.");
+					}else{
+						valid = 1;
+						strcpy(var->nickname, nickname);
+					}
 				}
 			}
 		}while(!valid)
 	}
+
+	printf("\n");
 }
 
 int interface_init(){

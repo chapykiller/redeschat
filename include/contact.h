@@ -45,4 +45,9 @@ typedef struct sContact
 contact * contact_create(const char *nickname, const char *host_name);
 void addMessage(contact * cont, const char * origin, char * message);
 
+void queueContact(contact * host);
+contact * dequeueContact();
+
+void contact_init();
+
 #endif
