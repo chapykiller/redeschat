@@ -209,5 +209,7 @@ int connections_connect(contact *newContact, int port)
         return -4;
     }
 
+    pthread_create(/*TODO*/, /*TODO*/, message_receive, (void*)newContact);
+
     return 0;
 }
