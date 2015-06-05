@@ -43,10 +43,10 @@ void displayContacts(char seq[]){
 
 void addContact(char * input, char seq[]){
 	char * hostname = (char *)malloc(31*sizeof(char));
-	char * nickname = (char *)malloc(21*sizeof(char));
+	char * nickname = (char *)malloc(51*sizeof(char));
 
 	int r1 = sscanf(input, "%30s", hostname);
-	int r2 = sscanf(input, "%20s", nickname);
+	int r2 = sscanf(input, "%50s", nickname);
 
 	if(r1 == EOF || r2 == EOF){
 		printf("Syntax is wrong. Please consult /help if you need to.%s", seq);
@@ -54,25 +54,40 @@ void addContact(char * input, char seq[]){
 		if(!checkNickname(nickname)){
 			printf("Nickname cotains illegal characters. Please use only letters and numbers.%s", seq);
 		}else{
-			contact * contact_by_host = hash_retrieveContact(hostname);
-			contact * contact_by_nick = hash_retrieveContact(nickname);
+			int i, length = 0;
 
-			if(contact_by_host != NULL && contact_by_host->status == STATUS_ALIVE){
-				printf("A contact with this hostname already exists.%s", seq);
+			for(i=0; nickname[i]!='\0'; i++){
+				length++;
+			}
+
+			if(length > 20){
+				printf("Nickname is way too long.%s", seq);
+			}else if(length == 0){
+				printf("Please type a nickname.%s", seq);
 			}else{
-				if(contact_by_nick != NULL && contact_by_nick->status == STATUS_ALIVE){
-					printf("A contact with this nickname already exists.%s", seq);
+				contact * contact_by_host = hash_retrieveContact(hostname);
+				contact * contact_by_nick = hash_retrieveContact(nickname);
+
+				if(contact_by_host != NULL && contact_by_host->status == STATUS_ALIVE){
+					printf("A contact with this hostname already exists.%s", seq);
 				}else{
-					if(contact_by_nick != NULL)
-						hash_removeContact(nickname);
-					if(contact_by_host != NULL)
-						hash_removeContact(hostname);
+					if(contact_by_nick != NULL && contact_by_nick->status == STATUS_ALIVE){
+						printf("A contact with this nickname already exists.%s", seq);
+					}else{
+						if(contact_by_nick != NULL)
+							hash_removeContact(nickname);
+						if(contact_by_host != NULL)
+							hash_removeContact(hostname);
 
-					contact * newContact = contact_create(hostname, nickname);
+						contact * newContact = contact_create(hostname, nickname);
 
-					connections_connect(newContact, 4869);
+						if(connections_connect(newContact, 48691) < 0){
+							printf("Failed to estabilish connection.");
+						}
+					}
 				}
 			}
+
 		}
 	}
 
@@ -156,27 +171,58 @@ void processInboundConnections(contact * var){
 	for(; var!=NULL; var = dequeueContact()){
 		int valid;
 
-		char * nickname = (char *)malloc(300*sizeof(char));
+		char * nickname = (char *)malloc(64*sizeof(char));
 
 		do{
 			printf("\n\n Hostname: %s > ", var->host_name);
+			fgets(nickname, 64, stdin);
 
+			int nl = 0;
 			valid = 0;
-			int r2 = scanf("%20s", nickname);
 
-			if(r2 == EOF){
-				printf("An error occurred. Please try again.");
+			int i;
+
+			for(i=0; nickname[i]!='\0'; i++){
+				if(nickname[i]=='\n')
+					nl = 1;
+			}
+
+			if(!nl){
+				do{
+					fgets(nickname, 64, stdin);
+
+					for(i=0; nickname[i]!='\0'; i++){
+						if(nickname[i]=='\n')
+							nl = 1;
+					}
+				}while(!nl);
+
+				printf("Contact name is way too long.");
 			}else{
-				if(!checkNickname(nickname)){
-					printf("Nickname cotains illegal characters. Please use only letters and numbers.");
-				}else{
-					contact * contact_by_nick = hash_retrieveContact(nickname);
+				int length = 0;
 
-					if(contact_by_nick != NULL && contact_by_nick->status == STATUS_ALIVE){
-						printf("A contact with this name already exists.");
+				for(i=0; nickname[i]!='\n'; i++)
+					length++;
+				nickname[i] = '\0';
+
+				if(length == 0){
+					printf("Please type a nickname.");
+				}else{
+					if(length > 20){
+						printf("Contact name is way too long.\n");
 					}else{
-						valid = 1;
-						strcpy(var->nickname, nickname);
+						if(!checkNickname(nickname)){
+							printf("Nickname cotains illegal characters. Please use only letters and numbers.");
+						}else{
+							contact * contact_by_nick = hash_retrieveContact(nickname);
+
+							if(contact_by_nick != NULL && contact_by_nick->status == STATUS_ALIVE){
+								printf("A contact with this name already exists.");
+							}else{
+								valid = 1;
+								strcpy(var->nickname, nickname);
+							}
+						}
 					}
 				}
 			}
