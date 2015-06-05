@@ -1,3 +1,5 @@
+#include <unistd.h>
+
 #include "broadcast.h"
 #include "message.h"
 #include "contact.h"
@@ -16,7 +18,7 @@ void broadcast_send(char *message)
 
 void *broadcast_alive(void *data)
 {
-    char *aliveMessage = makeJSONMessage(/*TODO*/);
+    char *aliveMessage = makeJSONMessage(0);
 
     while(running)
     {
