@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "threadManagement.h"
+#include "global.h"
 
 pthread_t * createThread(){
 	pthread_t * ret = (pthread_t *)malloc(sizeof(pthread_t));
@@ -10,12 +11,12 @@ pthread_t * createThread(){
 	threadNode * newNode = (threadNode *)malloc(sizeof(threadNode));
 	newNode->thread = ret;
 
+	newNode->next = threadList;
+	newNode->prev = NULL;
+
 	if(threadList == NULL){
-		newNode->next = NULL;
-		newNode->prev = NULL;
+		threadList = newNode;
 	}else{
-		newNode->next = threadList;
-		newNode->prev = NULL;
 
 		threadList->prev = newNode;
 
