@@ -10,6 +10,8 @@
 #include "message.h"
 #include "global.h"
 
+#define MESSAGE_MAXSIZE 519
+
 int message_send(contact *receiver, char *send_data)
 {
     if(receiver == 0)
@@ -28,7 +30,7 @@ void *message_receive(void *data)
     contact *sender = (contact*)data;
 
     int bytes_recv;
-    char recv_data[/*TODO*/];
+    char recv_data[MESSAGE_MAXSIZE];
 
     while(running)
     {
@@ -38,7 +40,7 @@ void *message_receive(void *data)
             pthread_exit(0);
         }
 
-        bytes_recv = recv(sender->socketvar, recv_data, /*TODO*/, 0);
+        bytes_recv = recv(sender->socketvar, recv_data, MESSAGE_MAXSIZE, 0);
 
         // Se ocorreu timeout, checa se o cliente pode estar disconectado
         if(bytes_recv == 0)
