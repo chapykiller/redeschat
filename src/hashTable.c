@@ -67,7 +67,6 @@ int hash_addContact(contact * newcontact, char * key){
     pthread_mutex_lock(&hashMutex);
 
 	newNode->next = contactTable.table[hash];
-
 	contactTable.table[hash] = newNode;
 
 	if(newcontact->references == 0)

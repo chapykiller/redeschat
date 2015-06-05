@@ -22,6 +22,70 @@ int checkNickname(char * nick){
 	return 1;
 }
 
+char ** decompose(char * str, int * args){
+	int i, j, narg = 0;
+	int reading = 0;
+	int current = 0;
+
+	for(i=0; str[i]!='\n' && str[i]!= '\0'; i++){
+		if(str[i] == ' '){
+			if(reading == 1){
+				reading = 0;
+			}
+		}else{
+			if(reading == 0){
+				narg++;
+				reading = 1;
+			}
+		}
+	}
+
+	char ** ret = (char **)malloc(narg*sizeof(char *));
+
+	reading = 0;
+
+	for(i=0; str[i]!='\n' && str[i]!= '\0'; i++){
+		if(str[i] == ' '){
+			if(reading == 1){
+				reading = 0;
+			}
+		}else{
+			int size, k;
+
+			if(reading == 0){
+				narg++;
+
+				for(j=i; str[j]!='\n' && str[j]!= '\0' && str[j]!=' '; j++)
+					size++;
+
+				ret[current] = (char *)malloc((size+1)*sizeof(char));
+				for(j=i, k=0; str[j]!='\n' && str[j]!= '\0' && str[j]!=' '; j++)
+					ret[current][k++] = str[j];
+				ret[current][k] = '\0';
+
+				current++;
+				reading = 1;
+			}
+
+		}
+	}
+
+	*args = current;
+
+	return ret;
+}
+
+void freeMatrix(char ** m, int n){
+	int i;
+
+	for(i=0; i<n; i++)
+		free(m[i]);
+	free(m);
+
+
+	return;
+}
+
 void displayContacts(char seq[]){
 	contact * current;
 
@@ -46,23 +110,19 @@ void displayContacts(char seq[]){
 }
 
 void addContact(char * input, char seq[]){
-	char * hostname = (char *)malloc(31*sizeof(char));
-	char * nickname = (char *)malloc(51*sizeof(char));
+	int narg;
+	char ** args = decompose(input, &narg);
 
-	int r1 = sscanf(input, "%30s", hostname);
-	int r2 = sscanf(input, "%50s", nickname);
+	char * hostname = args[1];
+	char * nickname = args[2];
 
-	if(r1 == EOF || r2 == EOF){
+	if(narg != 3){
 		printf("Syntax is wrong. Please consult /help if you need to.%s", seq);
 	}else{
 		if(!checkNickname(nickname)){
 			printf("Nickname cotains illegal characters. Please use only letters and numbers.%s", seq);
 		}else{
-			int i, length = 0;
-
-			for(i=0; nickname[i]!='\0'; i++){
-				length++;
-			}
+			int length = strlen(nickname);
 
 			if(length > 20){
 				printf("Nickname is way too long.%s", seq);
@@ -95,20 +155,20 @@ void addContact(char * input, char seq[]){
 		}
 	}
 
-	free(hostname);
-	free(nickname);
+	freeMatrix(args, narg);
 
 	return;
 }
 
 void doMsg(char * input, char seq[]){
-	char * arg1 = (char *)malloc(31*sizeof(char));
-	char * arg2 = (char *)malloc(512*sizeof(char));
+	int narg;
+	char ** args = decompose(input, &narg);
 
-	int r1 = sscanf(input, "%30s", arg1);
-	int r2 = sscanf(input, "%[^\n]", arg2);
+	char * arg1 = args[1];
+	char * arg2 = args[2];
 
-	if(r1 == EOF){
+	if(narg < 2 || narg > 3){
+
 		printf("Syntax is wrong. Please consult /help if you need to.%s", seq);
 	}else{
 		contact * target = hash_retrieveContact(arg1);
@@ -119,7 +179,7 @@ void doMsg(char * input, char seq[]){
 			if(target->status == STATUS_DEAD)
 				printf("Contact is down. Oh well.%s", seq);
 			else{
-				if(r2 == EOF){
+				if(narg == 2){
 					strcpy(messageTarget, arg1);
 				}else{
 					addMessage(target, "You", arg2);
@@ -131,16 +191,19 @@ void doMsg(char * input, char seq[]){
 		}
 	}
 
-	free(arg1);
-	free(arg2);
+	freeMatrix(args, narg);
+
+	return;
 }
 
 void displayMessages(char * input, char seq[]){
-	char * arg1 = (char *)malloc(31*sizeof(char));
-	int r1 = sscanf(input, "%30s", arg1);
+	int narg;
+	char ** args = decompose(input, &narg);
 
-	if(r1 == EOF){
-		printf("You need to inform the contact you exchanged messages with to display the messages exchanged.%s", seq);
+	char * arg1 = args[1];
+
+	if(narg != 2){
+		printf("Syntax is wrong. Please consult /help.%s", seq);
 	}else{
 		contact * target = hash_retrieveContact(arg1);
 
@@ -162,7 +225,9 @@ void displayMessages(char * input, char seq[]){
 		}
 	}
 
-	free(arg1);
+	freeMatrix(args, narg);
+
+	return;
 }
 
 void processInboundConnections(contact * var){
