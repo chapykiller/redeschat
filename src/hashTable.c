@@ -64,22 +64,50 @@ int hash_addContact(contact * newcontact, char * key){
 	newNode->next = contactTable.table[hash];
 	contactTable.table[hash] = newNode;
 
-	if(contactList == NULL){
-		contactList = newcontact;
+	if(newcontact->references == 0)
+		if(contactList == NULL){
+			contactList = newcontact;
 
-		newcontact->next = NULL;
-		newcontact->prev = NULL;
-    }
-	else{
-		contactList->prev = newcontact;
+			newcontact->next = NULL;
+			newcontact->prev = NULL;
+		}
+		else{
+			contactList->prev = newcontact;
 
-		newcontact->next = contactList;
-		newcontact->prev = NULL;
+			newcontact->next = contactList;
+			newcontact->prev = NULL;
 
-		contactList = newcontact;
+			contactList = newcontact;
+		}
 	}
 
+	newcontact->references++;
+
 	return 0;
+}
+
+void hash_removeContact(char * key){
+	int hash = getHash(key);
+	if(hash == -1)
+		return NULL;
+
+	hashNode * current;
+
+	for(current = contactTable.table[hash]; current!=NULL && current->next!=NULL; current = current->next){
+		if(cmp(key, current->next->key)){
+			hashNode * temp = current->next;
+
+			current->next = current->next->next;
+
+			if(temp->nodeContact->references-- == 0){
+				free(temp->nodeContact);
+			}
+			free(temp);
+		}
+
+	}
+
+	return NULL;
 }
 
 void hash_init(){

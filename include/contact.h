@@ -15,9 +15,11 @@ typedef struct sContact
     struct sContact * next;
     struct sContact * prev;
 
+    int references;
+
     int socketvar;
 } contact;
 
-int contact_create(contact *newContact, char *nickname, char *host_name, int newSocketvar);
+contact * contact_create(const char *nickname, const char *host_name);
 
 #endif

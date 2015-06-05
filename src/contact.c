@@ -5,18 +5,20 @@
 
 #include "contact.h"
 
-int contact_create(contact *newContact, char *nickname, char *host_name, int newSocketvar)
+contact * contact_create(const char *nickname, const char *host_name)
 {
-    if(newContact = (contact*)malloc(sizeof(contact)))
+	contact * ret;
+
+    if(ret = (contact*)malloc(sizeof(contact)))
     {
         perror("Error allocating contact");
         return -1;
     }
 
-    strcpy(newContact->host_name, host_name);
-    strcpy(newContact->nickname, nickname);
+    strcpy(ret->host_name, host_name);
+    strcpy(ret->nickname, nickname);
 
-    newContact->socketvar = newSocketvar;
+    ret->references = 0;
 
-    return 0;
+    return ret;
 }
