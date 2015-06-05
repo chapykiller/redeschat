@@ -45,6 +45,27 @@ void addMessage(contact * cont, const char * origin, char * message){
 	return;
 }
 
+void queueContact(contact * host){
+	contactNode * newNode = (contactNode *)malloc(sizeof(contactNode));
+	newNode->value = host;
+
+	newNode->next = contactQueue;
+}
+
+contact * dequeueContact(){
+	if(contactQueue == NULL){
+		return NULL;
+	}else{
+		contact * ret = contactQueue->value;
+		contactNode * temp = contactQueue;
+
+		contactQueue = contactQueue->next;
+		free(temp);
+
+		return ret;
+	}
+}
+
 contact * contact_create(const char *nickname, const char *host_name)
 {
 	contact * ret = (contact*)malloc(sizeof(contact));
@@ -63,4 +84,10 @@ contact * contact_create(const char *nickname, const char *host_name)
     ret->messages = NULL;
 
     return ret;
+}
+
+void contact_init(){
+	contactQueue = NULL;
+
+	return;
 }

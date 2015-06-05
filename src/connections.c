@@ -166,8 +166,9 @@ void *connections_listen(void *data)
 
                 // Atribui o socket
                 newContact->socketvar = connected;
-
-                //TODO adiciona para a lista ligada
+            
+                // Adiciona para a lista ligada
+                queueContact(newContact);
             }
         }
 
