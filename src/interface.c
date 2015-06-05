@@ -6,14 +6,18 @@
 
 char messageTarget[31];
 
-void displayContacts(){
+void displayContacts(char seq[]){
 	contact * current;
 
 	if(contactList != NULL){
+		int count = 0;
+
 		for(current = contactList; current!=NULL; current = current->next){
 			if(current->status == STATUS_ALIVE)
-				printf("%s > %s\n", current->host_name, current->nickname);
+				printf(" - %s > %s\n", current->host_name, current->nickname);
 		}
+
+		printf("\nListed a total of %d contacts.%s", count, seq);
 	}else{
 		printf("Contact list is empty. :(%s", seq);
 	}
@@ -21,7 +25,7 @@ void displayContacts(){
 	return;
 }
 
-void addContact(char * input, char * seq){
+void addContact(char * input, char seq[]){
 	char * hostname = (char *)malloc(31*sizeof(char));
 	char * nickname = (char *)malloc(21*sizeof(char));
 
@@ -39,16 +43,16 @@ void addContact(char * input, char * seq){
 	return;
 }
 
-void doMsg(char * input, char * seq){
+void doMsg(char * input, char seq[]){
 	char * arg1 = (char *)malloc(31*sizeof(char));
 	char * arg2 = (char *)malloc(512*sizeof(char));
 
 	int r1 = sscanf(input, "%30s", hostname);
-	int r2 = sscanf(input, "%20s", nickname);
+	int r2 = sscanf(input, "%[^\n]", arg2);
 
 	if(r1 == EOF){
 		printf("Syntax is wrong. Please consult /help if you need to.%s", seq);
-	}else if(r2 == EOF){
+	}else{
 		contact * target = hash_retrieveContact(r1);
 
 		if(target == NULL){
@@ -57,14 +61,18 @@ void doMsg(char * input, char * seq){
 			if(target->status == STATUS_DEAD)
 				printf("Contact is down. Oh well.%s", seq);
 			else{
-				strcpy(messageTarget, target);
+				if(r2 == EOF){
+					strcpy(messageTarget, target);
+				}else{
+					char * json_msg = makeJSONMessage(r2);
+					message_send(target, json_msg);
+				}
 			}
 		}
-	}else{
-		char 
-
-		sscanf(input, " %[^\n]",str)
 	}
+
+	free(arg1);
+	free(arg2);
 }
 
 int interface_init(){
