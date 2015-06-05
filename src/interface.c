@@ -7,6 +7,7 @@
 #include "connections.h"
 #include "jsonxstr.h"
 #include "message.h"
+#include "contact.h"
 
 char messageTarget[31];
 
@@ -79,6 +80,36 @@ void doMsg(char * input, char seq[]){
 	free(arg2);
 }
 
+void displayMessages(){
+	char * arg1 = (char *)malloc(31*sizeof(char));
+	int r1 = sscanf(input, "%30s", arg1);
+
+	if(r1 == EOF){
+		printf("You need to inform the contact you exchanged messages with to display the messages exchanged.%s", seq);
+	}else{
+		contact * target = hash_retrieveContact(arg1);
+
+		if(target == NULL){
+			printf("Contact is missing. Review your parameters.%s", seq);
+		}else{
+			messageNode * current;
+
+			for(current = target->messages; current!=NULL && current->next!=NULL; current = current->next);
+			for(; current!=NULL; current = current->prev){
+				printf(" || %s\n", current->message);
+			}
+
+			if(target->status == STATUS_DEAD)
+				printf("\nThis contact is no longer available.%s", seq);
+			else{
+				printf("\nMessages displayed.%s", seq);
+			}
+		}
+	}
+
+	free(arg1);
+}
+
 int interface_init(){
 	int i;
 
@@ -121,6 +152,7 @@ int interface_init(){
 					printf(" - /add <hostname> <nickname>\tAdds contact with IP hostname under the name of nickname.\n");
 					printf(" - /list\t\t\tLists all your contacts.\n");
 					printf(" - /quit\t\t\tQuits the application. :(\n");
+					printf(" - /display <contact>\t\tDisplays the last %d messages with contact.\n", MAX_MESSAGES);
 					printf(" - /msg <receiver>\t\tChanges the chat focus to receiver. They will start receiving every message you send.\n");
 					printf(" - /msg <receiver> <message>\tSends message to receiver without changing chat focus.%s", seq);
 				}else if(cmp(command, "/list")){
@@ -137,8 +169,10 @@ int interface_init(){
 					printf("\n");
 
 					doMsg(input, seq);
-				}else if(cmp(command, "/msg")){
+				}else if(cmp(command, "/display")){
+					printf("\n");
 
+					displayMessages(input, seq);
 				}else if(cmp(command, "/msg")){
 
 				}else{
@@ -155,15 +189,15 @@ int interface_init(){
 					if(target->status == STATUS_DEAD)
 						printf("Your target contact disconnected. Message not sent.%s", seq);
 					else{
-						char * msg = (char *)malloc(512*sizeof(char));
+						/*char * msg = (char *)malloc(512*sizeof(char));
 
 						sscanf(input, "%s", msg);
-						sscanf(input, "%[^\n]", msg);
+						sscanf(input, "%[^\n]", msg);*/
 
-						char * json_msg = makeJSONMessage(msg);
+						char * json_msg = makeJSONMessage(input);
 						message_send(target, json_msg);
 
-						free(msg);
+						//free(msg);
 					}
 				}
 			}

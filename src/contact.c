@@ -5,9 +5,11 @@
 
 #include "contact.h"
 
-void addMessage(contact * cont, char * message){
-	char * copy = (char *)malloc(512*sizeof(char));
-	strcpy(copy, message);
+void addMessage(contact * cont, const char * origin, char * message){
+	char * copy = (char *)malloc(553*sizeof(char));
+	strcpy(copy, origin);
+	strcat(copy, ": ");
+	strcat(copy, message);
 
 	messageNode * newNode = (messageNode *)malloc(sizeof(messageNode));
 	newNode->message = copy;
@@ -15,14 +17,29 @@ void addMessage(contact * cont, char * message){
 	newNode->next = cont->messages;
 	newNode->prev = NULL;
 
-	int n = 0;
-
 	if(cont->messages == NULL){
 		cont->messages = newNode;
 	}else{
 		cont->messages->prev = newNode;
 
 		cont->messages = newNode;
+	}
+
+	messageNode * current;
+	int n = 0;
+
+	for(current = cont->messages; current!=NULL; current = current->next){
+		if(n++ > MAX_MESSAGES){
+			current->prev->next = NULL;
+
+			for(; current!=NULL;){
+				messageNode * temp = current;
+				current = current->next;
+
+				free(temp->message);
+				free(temp);
+			}
+		}
 	}
 
 	return;
