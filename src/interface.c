@@ -390,8 +390,6 @@ int interface_init(){
 					printf("\n");
 
 					displayMessages(input, seq);
-				}else if(cmp(command, "/msg")){
-
 				}else{
 					printf("\nInvalid command. Type /help if you're lost.%s", seq);
 				}

@@ -46,7 +46,10 @@ contact * hash_retrieveContact(char * key)
     for(current = contactTable.table[hash]; current!=NULL; current = current->next)
     {
         if(cmp(key, current->key))
+        {
+            pthread_mutex_unlock(&hashMutex);
             return current->nodeContact;
+        }
     }
 
     pthread_mutex_unlock(&hashMutex);
