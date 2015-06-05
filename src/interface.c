@@ -8,6 +8,7 @@
 #include "jsonxstr.h"
 #include "message.h"
 #include "contact.h"
+#include "broadcast.h"
 
 char messageTarget[31];
 
@@ -143,7 +144,7 @@ void addContact(char * input, char seq[]){
 						if(contact_by_host != NULL)
 							hash_removeContact(hostname);
 
-						contact * newContact = contact_create(hostname, nickname);
+						contact * newContact = contact_create(nickname,hostname);
 
 						if(connections_connect(newContact, 48691) < 0){
 							printf("Failed to estabilish connection.%s", seq);
@@ -183,7 +184,7 @@ void doMsg(char * input, char seq[]){
 					strcpy(messageTarget, arg1);
 				}else{
 					addMessage(target, "You", arg2);
-					
+
 					char * json_msg = makeJSONMessage(arg2);
 					message_send(target, json_msg);
 				}
@@ -362,6 +363,7 @@ int interface_init(){
 
 					displayContacts(seq);
 				}else if(cmp(command, "/quit")){
+				    broadcast_dead();
 					stopRunning();
 				}else if(cmp(command, "/add")){
 					printf("\n");
