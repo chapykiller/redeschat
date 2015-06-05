@@ -1,12 +1,14 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netdb.h>
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <pthread.h>
 
 #include "global.h"
 #include "connections.h"
@@ -139,9 +141,13 @@ void *connections_listen(void *data)
 
         contact *newContact;
         char nickname[20];
+        char host_name[30];
 
         //TODO receive nickname
-        if(contact_create(newContact, nickname, client_addr.sin_addr, connected) == 0)
+        
+        inet_ntop(AF_INET, &(client_addr.sin_addr), host_name, INET_ADDRSTRLEN);
+
+        if(contact_create(newContact, nickname, host_name, connected) == 0)
             hash_addContact(newContact);
 
         sleep(1);
@@ -164,8 +170,10 @@ int connections_connect(contact *newContact, int port)
     if(hash_retrieveContact(newContact->host_name) != 0)
     {
         perror("Hostname already connected");
-        return -2
+        return -2;
     }
+    
+    host = gethostbyname(newContact->host_name);
     
     if ((newContact->socketvar = socket(AF_INET, SOCK_STREAM, 0)) == -1)
     {
