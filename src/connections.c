@@ -1,5 +1,6 @@
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/select.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
@@ -29,10 +30,6 @@ int connections_listenerCreate(connectionListener **conListener, int port)
         return -1;
     }
 
-    // Coloca o timeout do recv como 1 segundo
-    (*conListener)->timev.tv_sec = 1;
-    (*conListener)->timev.tv_usec = 0;
-
    /* Funcao socket(sin_family,socket_type,protocol_number) retorna um inteiro (socket descriptor), caso erro retorna -1
 
       O numero do protocolo (protocol_number):
@@ -43,6 +40,8 @@ int connections_listenerCreate(connectionListener **conListener, int port)
      perror("Error creating socket");
      return -2;
    }
+
+   int true = 1;
 
    /* Funcao setsockopt(int socket, int level, int optname, void*optval, size_t optlen)
 
@@ -59,7 +58,7 @@ int connections_listenerCreate(connectionListener **conListener, int port)
 	optlen = tamanho do valor
 
    */
-   if (setsockopt((*conListener)->socketvar, SOL_SOCKET, SO_REUSEADDR, (char*)&(*conListener)->timev,sizeof(struct timeval)) == -1)
+   if (setsockopt((*conListener)->socketvar, SOL_SOCKET, SO_REUSEADDR, (char*)&true, sizeof(int)) == -1)
    {
       perror("Error in Setsockopt");
       return -3;
@@ -121,42 +120,55 @@ void *connections_listen(void *data)
     // Socket criada para essa conexao
     int connected;
 
+    // Coloca o timeout do accept como 1 segundo
+    struct timeval timev;
+    timev.tv_sec = 1;
+    timev.tv_usec = 0;
+
+    fd_set listener_fd_set;
+    FD_ZERO(&listener_fd_set);
+    FD_SET(conListener->socketvar, &listener_fd_set);
+
     // Enquanto o programa nao for fechado
     while(running)
     {
         // Variavel para armazenar o tamanho de endereco do cliente conectado
         sin_size = sizeof(struct sockaddr_in);
 
-        /* Funcao accept(int socket, struct sockaddr*addr, size_t*length_ptr)
-	        A funcao accept aceita uma conexao e cria um novo socket para esta conexao
-
-	        int socket = descriptor do socket
-
-	        struct sockaddr*addr = endereco de destino (cliente)
-
-	        size_t*length_ptr = tamanho do endereco de destino
-        */
-        connected = accept(conListener->socketvar, (struct sockaddr *)&client_addr, &sin_size);
-
-        // Representa o contato que acabou de conectar
-        contact *newContact;
-        // IP ou endereco desse contato
-        char host_name[30];
-
-        // Salva o host_name do contato
-        inet_ntop(AF_INET, &(client_addr.sin_addr), host_name, INET_ADDRSTRLEN);
-
-        // Aloca e atribui os valores em newContact
-        newContact = contact_create("", host_name);
-        if(newContact != NULL)
+        if( (select(conListener->socketvar + 1, &listener_fd_set, NULL, NULL, &timev)) > 0)
         {
-            // Adiciona o contato na tabela hash usando host_name como chave
-            hash_addContact(newContact, newContact->host_name);
 
-            // Atribui o socket
-            newContact->socketvar = connected;
+            /* Funcao accept(int socket, struct sockaddr*addr, size_t*length_ptr)
+	            A funcao accept aceita uma conexao e cria um novo socket para esta conexao
 
-            //TODO adiciona para a lista ligada
+	            int socket = descriptor do socket
+
+	            struct sockaddr*addr = endereco de destino (cliente)
+
+	            size_t*length_ptr = tamanho do endereco de destino
+            */
+            connected = accept(conListener->socketvar, (struct sockaddr *)&client_addr, &sin_size);
+
+            // Representa o contato que acabou de conectar
+            contact *newContact;
+            // IP ou endereco desse contato
+            char host_name[30];
+
+            // Salva o host_name do contato
+            inet_ntop(AF_INET, &(client_addr.sin_addr), host_name, INET_ADDRSTRLEN);
+
+            // Aloca e atribui os valores em newContact
+            newContact = contact_create("", host_name);
+            if(newContact != NULL)
+            {
+                // Adiciona o contato na tabela hash usando host_name como chave
+                hash_addContact(newContact, newContact->host_name);
+
+                // Atribui o socket
+                newContact->socketvar = connected;
+
+                //TODO adiciona para a lista ligada
+            }
         }
 
         sleep(1);
@@ -216,11 +228,22 @@ int connections_connect(contact *newContact, int port)
     // Obtem o host a partir de host_name
     host = gethostbyname(newContact->host_name);
 
+    // Coloca o timeout do recv como 1 segundo
+    struct timeval timev;
+    timev.tv_sec = 1;
+    timev.tv_usec = 0;
+    
     // Cria a socket
     if ((newContact->socketvar = socket(AF_INET, SOCK_STREAM, 0)) == -1)
     {
         perror("Error creating socket");
         return -4;
+    }
+
+    if (setsockopt(newContact->socketvar, SOL_SOCKET, SO_RCVTIMEO, (char*)&timev, sizeof(struct timeval)) == -1)
+    {
+        perror("Error in Setsockopt");
+        return -5;
     }
 
     // Atribui as configurações necessarias
@@ -233,7 +256,7 @@ int connections_connect(contact *newContact, int port)
     if (connect(newContact->socketvar, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)) == -1)
     {
         perror("Error during connect");
-        return -5;
+        return -6;
     }
 
     pthread_create(createThread(), 0, message_receive, (void*)newContact);

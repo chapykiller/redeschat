@@ -1,4 +1,4 @@
-CC=gcc -g -W
+CC=gcc -g -Wall
 CFLAGS=-lpthread -ljansson -I include/ -c
 CFLAGS2=-lpthread -ljansson -I include/
 SOURCES=broadcast.c connections.c contact.c hashTable.c interface.c jsonxstr.c main.c message.c threadManagement.c
