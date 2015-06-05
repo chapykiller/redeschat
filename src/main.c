@@ -45,6 +45,7 @@ int main()
     }
 
     free(conListener);
+    hash_exit();
 
     return 0;
 }
