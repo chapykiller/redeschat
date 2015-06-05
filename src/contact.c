@@ -12,7 +12,7 @@ contact * contact_create(const char *nickname, const char *host_name)
     if(ret = (contact*)malloc(sizeof(contact)))
     {
         perror("Error allocating contact");
-        return -1;
+        return NULL;
     }
 
     strcpy(ret->host_name, host_name);

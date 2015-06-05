@@ -14,7 +14,8 @@
 #include "connections.h"
 #include "contact.h"
 #include "hashTable.h"
-#include "threadManagement"
+#include "threadManagement.h"
+#include "message.h"
 
 /*
  * Aloca e inicializa uma struct usada para ouvir por conexões

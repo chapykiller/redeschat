@@ -68,6 +68,7 @@ int hash_addContact(contact * newcontact, char * key){
 	contactTable.table[hash] = newNode;
 
 	if(newcontact->references == 0)
+    {
 		if(contactList == NULL){
 			contactList = newcontact;
 

@@ -3,6 +3,7 @@
 
 #include "global.h"
 #include "hashTable.h"
+#include "connections.h"
 
 char messageTarget[31];
 
