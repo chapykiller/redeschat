@@ -6,6 +6,7 @@
 #include "connections.h"
 #include "threadManagement.h"
 #include "hashTable.h"
+#include "interface.h"
 
 int main()
 {
@@ -21,7 +22,7 @@ int main()
     pthread_create(createThread(), 0, connections_listen, (void*)conListener);
     pthread_create(createThread(), 0, broadcast_alive, NULL);
 
-    running = 0;
+    interface_init();
 
 	threadNode *current;
     threadNode *previous = NULL;

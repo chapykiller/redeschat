@@ -37,5 +37,6 @@ typedef struct sContact
 } contact;
 
 contact * contact_create(const char *nickname, const char *host_name);
+void addMessage(contact * cont, const char * origin, char * message);
 
 #endif

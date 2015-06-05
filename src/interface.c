@@ -69,7 +69,7 @@ void doMsg(char * input, char seq[]){
 				if(r2 == EOF){
 					strcpy(messageTarget, arg1);
 				}else{
-					addMessage(receiver, "You", arg2);
+					addMessage(target, "You", arg2);
 					
 					char * json_msg = makeJSONMessage(arg2);
 					message_send(target, json_msg);
@@ -197,7 +197,7 @@ int interface_init(){
 						sscanf(input, "%[^\n]", msg);*/
 
 					    // Salva a mensagem no historico
-					   	addMessage(receiver, "You", input);
+					   	addMessage(target, "You", input);
 
 						char * json_msg = makeJSONMessage(input);
 						message_send(target, json_msg);
