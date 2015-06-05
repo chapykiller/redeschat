@@ -3,7 +3,6 @@
 
 #include <pthread.h>
 
-threadNode * threadList;
 struct threadNode;
 
 typedef struct threadNode{
@@ -12,6 +11,8 @@ typedef struct threadNode{
 	struct threadNode * next;
 	struct threadNode * prev;
 } threadNode;
+
+threadNode * threadList;
 
 pthread_t * createThread();
 void thread_init();
