@@ -136,3 +136,9 @@ void hash_init(){
 
 	return;
 }
+
+void hash_exit(){
+	free(contactTable.table);
+
+	return;
+}

@@ -19,6 +19,7 @@ int hash_addContact(contact * newcontact, char * key);
 void hash_removeContact(char * key);
 
 void hash_init();
+void hash_exit();
 
 
 struct sHashNode;
