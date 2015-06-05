@@ -47,13 +47,13 @@ void doMsg(char * input, char seq[]){
 	char * arg1 = (char *)malloc(31*sizeof(char));
 	char * arg2 = (char *)malloc(512*sizeof(char));
 
-	int r1 = sscanf(input, "%30s", hostname);
+	int r1 = sscanf(input, "%30s", arg1);
 	int r2 = sscanf(input, "%[^\n]", arg2);
 
 	if(r1 == EOF){
 		printf("Syntax is wrong. Please consult /help if you need to.%s", seq);
 	}else{
-		contact * target = hash_retrieveContact(r1);
+		contact * target = hash_retrieveContact(arg1);
 
 		if(target == NULL){
 			printf("Contact is missing. Review your parameters.%s", seq);
@@ -64,7 +64,7 @@ void doMsg(char * input, char seq[]){
 				if(r2 == EOF){
 					strcpy(messageTarget, target);
 				}else{
-					char * json_msg = makeJSONMessage(r2);
+					char * json_msg = makeJSONMessage(arg2);
 					message_send(target, json_msg);
 				}
 			}
@@ -138,12 +138,30 @@ int interface_init(){
 				}else if(cmp(command, "/msg")){
 
 				}else{
-					printf("\nInvalid command. Type \help if you're lost.%s", seq);
+					printf("\nInvalid command. Type /help if you're lost.%s", seq);
 				}
 
 				free(command);
 			}else{
+				contact * target = hash_retrieveContact(messageTarget);
 
+				if(target == NULL){
+					printf("No contact set to message to. Need any /help?%s", seq);
+				}else{
+					if(target->status == STATUS_DEAD)
+						printf("Your target contact disconnected. Message not sent.%s", seq);
+					else{
+						char * msg = (char *)malloc(512*sizeof(char));
+
+						sscanf(input, "%s", msg);
+						sscanf(input, "%[^\n]", msg);
+
+						char * json_msg = makeJSONMessage(msg);
+						message_send(target, json_msg);
+
+						free(msg);
+					}
+				}
 			}
 		}
 
