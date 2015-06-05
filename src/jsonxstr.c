@@ -2,8 +2,10 @@
 #include <errno.h>
 #include <stdio.h>
 #include <jansson.h>
+#include <string.h>
 
 #include "jsonxstr.h"
+#include "contact.h"
 
 char * validateJSON(char * arg, int * n){
 	int stacksize = 8;
@@ -109,7 +111,7 @@ char * makeJSONControl(int id){
     return control;
 }
 
-void decodeJSON(char * message){
+void decodeJSON(char * message, contact *sender){
 	json_t * root;
 	json_error_t error;
 
@@ -119,9 +121,14 @@ void decodeJSON(char * message){
 	int type = json_integer_value(type_j);
 
 	if(type == TYPEMESSAGE){
-		/* fazer algo */
+        char message[512];
+        strcpy(message, json_string_value(json_array_get(root, 1)));
+        addMessage(sender, sender->nickname, message);
 	}else if(type == TYPECONTROL){
-		/* fazer algo */
+        int controlType = json_integer_value(json_array_get(root, 1));
+
+        if(controlType == 1) // Se for uma mensagem avisando disconexão
+            sender->status = STATUS_DEAD;
 	}else{
 		perror("MESSAGE WITH INVALID TYPE!");
 	}
