@@ -17,12 +17,6 @@ typedef struct messageNode{
 	struct messageNode * prev;
 }messageNode;
 
-struct contactNode{
-    contact * value;
-
-    struct contactNode * next;
-} contactNode;
-
 typedef struct sContact
 {
     char host_name[31];
@@ -41,6 +35,12 @@ typedef struct sContact
 
     int socketvar;
 } contact;
+
+typedef struct contactNode{
+    contact * value;
+
+    struct contactNode * next;
+} contactNode;
 
 contact * contact_create(const char *nickname, const char *host_name);
 void addMessage(contact * cont, const char * origin, char * message);

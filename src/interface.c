@@ -76,35 +76,6 @@ void addContact(char * input, char seq[]){
 		}
 	}
 
-	    contact *aux_Contact = hash_retrieveContact(newContact->host_name);
-    if(aux_Contact != NULL)
-    {
-        // Se estiver desconectado, tira da tabela hash
-        if(aux_Contact->status == STATUS_DEAD)
-            hash_removeContact(aux_Contact->host_name);
-        // Se estiver conectado, apresenta erro
-        else
-        {
-            perror("Hostname already connected");
-            return -2;
-        }
-    }
-
-    // Se esse nickname ja esta na lista, verifica se ainda esta conectado
-    aux_Contact = hash_retrieveContact(newContact->nickname);
-    if(aux_Contact != NULL)
-    {
-        // Se estiver desconectado, tira da tabela hash
-        if(aux_Contact->status == STATUS_DEAD)
-            hash_removeContact(aux_Contact->nickname);
-        // Se estiver conectado, apresenta erro
-        else
-        {
-            perror("Nickname already in use");
-            return -3;
-        }
-    }
-
 	free(hostname);
 	free(nickname);
 
@@ -175,7 +146,7 @@ void displayMessages(char * input, char seq[]){
 	free(arg1);
 }
 
-int processInboundConnections(contact * var){
+void processInboundConnections(contact * var){
 	if(var == NULL)
 		return;
 
@@ -185,16 +156,16 @@ int processInboundConnections(contact * var){
 	for(; var!=NULL; var = dequeueContact()){
 		int valid;
 
-		char * nickname = (char *)malloc(21*sizeof(char));
+		char * nickname = (char *)malloc(300*sizeof(char));
 
 		do{
 			printf("\n\n Hostname: %s > ", var->host_name);
 
 			valid = 0;
-			int r2 = sscanf(input, "%20s", nickname);
+			int r2 = scanf("%20s", nickname);
 
 			if(r2 == EOF){
-				printf("An error occurred. Please try again.")
+				printf("An error occurred. Please try again.");
 			}else{
 				if(!checkNickname(nickname)){
 					printf("Nickname cotains illegal characters. Please use only letters and numbers.");
@@ -209,10 +180,12 @@ int processInboundConnections(contact * var){
 					}
 				}
 			}
-		}while(!valid)
+		}while(!valid);
 	}
 
 	printf("\n");
+
+	return;
 }
 
 int interface_init(){

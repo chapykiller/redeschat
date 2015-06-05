@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "contact.h"
+#include "global.h"
 
 void addMessage(contact * cont, const char * origin, char * message){
 	char * copy = (char *)malloc(553*sizeof(char));
@@ -50,6 +51,8 @@ void queueContact(contact * host){
 	newNode->value = host;
 
 	newNode->next = contactQueue;
+
+	return;
 }
 
 contact * dequeueContact(){
