@@ -14,6 +14,7 @@
 #include "connections.h"
 #include "contact.h"
 #include "hashTable.h"
+#include "threadManagement"
 
 /*
  * Aloca e inicializa uma struct usada para ouvir por conexões
@@ -159,6 +160,8 @@ void *connections_listen(void *data)
 
         sleep(1);
     }
+
+    close(conListener->socketvar);
     
     pthread_exit(0);
 }
@@ -232,7 +235,7 @@ int connections_connect(contact *newContact, int port)
         return -5;
     }
 
-    pthread_create(/*TODO*/, /*TODO*/, message_receive, (void*)newContact);
+    pthread_create(createThread(), 0, message_receive, (void*)newContact);
 
     return 0;
 }

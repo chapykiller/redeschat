@@ -28,6 +28,8 @@ int message_send(contact *receiver, char *send_data)
     // Envia a mensagem
     send(receiver->socketvar, send_data, strlen(send_data), 0);
 
+    free(send_data);
+
     return 0;
 }
 
