@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <stdio.h>
+#include <jansson.h>
 
 char * validateJSON(char * arg, int * n){
 	int stacksize = 8;
@@ -74,3 +75,46 @@ char * validateJSON(char * arg, int * n){
 	return NULL;
 }
 
+char * makeJSONMessage(char * string){
+	json_t * array = json_array();
+
+	json_t * type_j = json_integer(TYPECONTROL);
+	json_t * messageType_j = json_string(string);
+
+	json_array_append_new(array, type_j);
+	json_array_append_new(array, messageType_j);
+
+	return json_dumps(array, 0);
+}
+
+char * makeJSONControl(int id){
+	json_t * array = json_array();
+
+	json_t * type_j = json_integer(TYPECONTROL);
+	json_t * controlType_j = json_integer(id);
+
+	json_array_append_new(array, type_j);
+	json_array_append_new(array, controlType_j);
+
+	return json_dumps(array, 0);
+}
+
+void decodeJSON(char * message){
+	json_t * root;
+	json_error_t error;
+
+	root = json_loads(message, 0, &error);
+
+	json_t * type_j = json_array_get(root, 0);
+	int type = json_integer_value(type_j);
+
+	if(type == TYPEMESSAGE){
+		/* fazer algo */
+	}else if(type == TYPECONTROL){
+		/* fazer algo */
+	}else{
+		perror("MESSAGE WITH INVALID TYPE!");
+	}
+
+	return;
+}
