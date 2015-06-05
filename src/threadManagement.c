@@ -4,8 +4,6 @@
 
 #include "threadManagement.h"
 
-threadNode * threadList;
-
 pthread_t * createThread(){
 	pthread_t * ret = (pthread_t *)malloc(sizeof(pthread_t));
 

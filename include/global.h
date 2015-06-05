@@ -4,11 +4,13 @@
 #include <pthread.h>
 
 #include "hashTable.h"
+#include "threadManagement.h"
 
 int running;
 
 hashTable contactTable;
 contact * contactList;
+threadNode * threadList;
 
 pthread_mutex_t hashMutex;
 
