@@ -17,6 +17,12 @@ typedef struct messageNode{
 	struct messageNode * prev;
 }messageNode;
 
+struct contactNode{
+    contact * value;
+
+    struct contactNode * next;
+} contactNode;
+
 typedef struct sContact
 {
     char host_name[31];

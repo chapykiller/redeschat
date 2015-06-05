@@ -6,6 +6,7 @@
 #define HASHTABLE_SIZE 128
 
 #define isValid(c) ( ('0' <= (int)c && (int)c <= '9') || c=='.' || ('A' <= (int)c && (int)c <= 'Z') || ('a' <= (int)c && (int)c <= 'z') )
+#define isValidNick(c) ( ('0' <= (int)c && (int)c <= '9') || ('A' <= (int)c && (int)c <= 'Z') || ('a' <= (int)c && (int)c <= 'z') )
 
 pthread_mutex_t hashMutex;
 

@@ -11,6 +11,17 @@
 
 char messageTarget[31];
 
+int checkNickname(char * nick){
+	int i;
+
+	for(i=0; nick[i]!='\0'; i++){
+		if(!isValidNick(nick[i]))
+			return 0;
+	}
+
+	return 1;
+}
+
 void displayContacts(char seq[]){
 	contact * current;
 
@@ -40,10 +51,17 @@ void addContact(char * input, char seq[]){
 	if(r1 == EOF || r2 == EOF){
 		printf("Syntax is wrong. Please consult /help if you need to.%s", seq);
 	}else{
-		contact * newContact = contact_create(hostname, nickname);
+		if(!checkNickname(nickname)){
+			printf("Nickname cotains illegal characters. Please use only letters and numbers.%s", seq);
+		}else{
+			contact * newContact = contact_create(hostname, nickname);
 
-		connections_connect(newContact, 4869);
+			connections_connect(newContact, 4869);
+		}
 	}
+
+	free(hostname);
+	free(nickname);
 
 	return;
 }
@@ -112,6 +130,38 @@ void displayMessages(char * input, char seq[]){
 	free(arg1);
 }
 
+int processInboundConnections(contact * var){
+	if(var == NULL)
+		return;
+
+	printf("\n");
+	printf("Inbound connections detected. Please give them a nickname.");
+
+	for(; var!=NULL; var = dequeueContact()){
+		int valid;
+
+		char * nickname = (char *)malloc(21*sizeof(char));
+
+		do{
+			printf("\n\n Hostname: %s > ", var->host_name);
+
+			valid = 0;
+			int r2 = sscanf(input, "%20s", nickname);
+
+			if(r2 == EOF){
+				printf("An error occurred. Please try again.")
+			}else{
+				if(!checkNickname(nickname)){
+					printf("Nickname cotains illegal characters. Please use only letters and numbers.");
+				}else{
+					valid = 1;
+					strcpy(var->nickname, nickname);
+				}
+			}
+		}while(!valid)
+	}
+}
+
 int interface_init(){
 	int i;
 
@@ -144,6 +194,14 @@ int interface_init(){
 			printf("Your command is way too long. Restrict it to 512 characters.%s", seq);
 		}
 		else{
+			for(i=0; input[i]!='\0'; i++)
+				if(input[i]=='\n'){
+					input[i] = '\0';
+					break;
+				}
+
+			processInboundConnections( dequeueContact() );
+
 			if(input[0] == '/'){
 				char * command = (char *)malloc(24*sizeof(char));
 				sscanf(input, "%23s", command);
