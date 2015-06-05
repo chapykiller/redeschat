@@ -119,6 +119,8 @@ void *message_receive(void *data)
                 }
             }
             while(json_message != NULL);
+
+            sender->last_update = time(NULL);
         }
 
         sleep(1);

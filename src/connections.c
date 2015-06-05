@@ -179,11 +179,34 @@ int connections_connect(contact *newContact, int port)
         return -1;
     }
 
-    // Se esse IP ja esta na lista, nao permite uma nova conexao
-    if(hash_retrieveContact(newContact->host_name) != 0)
+    // Se esse IP ja esta na lista, verifica se ainda esta conectado
+    contact *aux_Contact = hash_retrieveContact(newContact->host_name);
+    if(aux_Contact != NULL)
     {
-        perror("Hostname already connected");
-        return -2;
+        // Se estiver desconectado, tira da tabela hash
+        if(aux_Contact->status == STATUS_DEAD)
+            hash_removeContact(aux_Contact->host_name);
+        // Se estiver conectado, apresenta erro
+        else
+        {
+            perror("Hostname already connected");
+            return -2;
+        }
+    }
+    
+    // Se esse nickname ja esta na lista, verifica se ainda esta conectado
+    aux_Contact = hash_retrieveContact(newContact->nickname);
+    if(aux_Contact != NULL)
+    {
+        // Se estiver desconectado, tira da tabela hash
+        if(aux_Contact->status == STATUS_DEAD)
+            hash_removeContact(aux_Contact->nickname);
+        // Se estiver conectado, apresenta erro
+        else
+        {
+            perror("Nickname already in use");
+            return -3;
+        }
     }
     
     // Obtem o host a partir de host_name
@@ -193,7 +216,7 @@ int connections_connect(contact *newContact, int port)
     if ((newContact->socketvar = socket(AF_INET, SOCK_STREAM, 0)) == -1)
     {
         perror("Error creating socket");
-        return -3;
+        return -4;
     }
 
     // Atribui as configurações necessarias
@@ -206,7 +229,7 @@ int connections_connect(contact *newContact, int port)
     if (connect(newContact->socketvar, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)) == -1)
     {
         perror("Error during connect");
-        return -4;
+        return -5;
     }
 
     pthread_create(/*TODO*/, /*TODO*/, message_receive, (void*)newContact);
