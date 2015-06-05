@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-lpthread -I include/ -c
-SOURCES=hashTable.c connections.c main.c
+SOURCES=hashTable.c connections.c message.c main.c
 OBJECTS=$(addprefix obj/, $(SOURCES:.c=.o))
 EXECUTABLE=Chat
 

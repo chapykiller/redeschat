@@ -24,7 +24,8 @@ int connections_listenerCreate(connectionListener *conListener, int port)
         return -1;
     }
 
-    conListener->true = 1;
+    conListener->timev.tv_sec = 1;
+    conListener->timev.tv_usec = 0;
 
    /* Funcao socket(sin_family,socket_type,protocol_number) retorna um inteiro (socket descriptor), caso erro retorna -1
    
@@ -61,7 +62,7 @@ int connections_listenerCreate(connectionListener *conListener, int port)
    	mesmo endereco possa receber varias conexoes devemos alterar o valor da opcao SO_REUSEADDR para TRUE (1).
 
    */
-   if (setsockopt(conListener->socketvar, SOL_SOCKET, SO_REUSEADDR, &conListener->true,sizeof(int)) == -1)
+   if (setsockopt(conListener->socketvar, SOL_SOCKET, SO_REUSEADDR, (char*)&conListener->timev,sizeof(struct timeval)) == -1)
    {
       perror("Error in Setsockopt");
       return -3;

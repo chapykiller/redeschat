@@ -8,7 +8,7 @@
 typedef struct sConnectionListener
 {
     int socketvar;
-    int true;
+    struct timeval timev;
     struct sockaddr_in addr;
 } connectionListener;
 
