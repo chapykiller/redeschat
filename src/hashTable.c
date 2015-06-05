@@ -19,10 +19,8 @@ int getHash(char * key){
 	int hashchar = 'z' - '.' + 1;
 
 	for(i=0; key[i]!='\0'; i++){
-		if(!isValid(key[i])){
-			perror("INVALID HASH KEY!");
+		if(!isValid(key[i]))
 			return -1;
-		}
 
 		hash = (hash * hashchar) % contactTable.tableSize;
 		hash = (hash + (key[i] - '.')) % contactTable.tableSize;
