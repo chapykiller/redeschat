@@ -149,6 +149,7 @@ int interface_init(){
 				sscanf(input, "%23s", command);
 
 				if(cmp(command, "/help")){
+					printf("\n");
 					printf("Yet Another P2P Chat provides the following commands:\n\n");
 					printf(" - /help\t\t\tIt must be pretty obvious what this command does.\n");
 					printf(" - /add <hostname> <nickname>\tAdds contact with IP hostname under the name of nickname.\n");
@@ -183,6 +184,7 @@ int interface_init(){
 
 				free(command);
 			}else{
+				printf("\n");
 				contact * target = hash_retrieveContact(messageTarget);
 
 				if(target == NULL){
