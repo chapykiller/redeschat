@@ -23,7 +23,7 @@
 int connections_listenerCreate(connectionListener *conListener, int port)
 {
     conListener = (connectionListener*)malloc( sizeof(connectionListener) );
-    if(conListener = 0)
+    if(conListener == 0)
     {
         perror("Error allocating connection listener.");
         return -1;
@@ -34,28 +34,28 @@ int connections_listenerCreate(connectionListener *conListener, int port)
     conListener->timev.tv_usec = 0;
 
    /* Funcao socket(sin_family,socket_type,protocol_number) retorna um inteiro (socket descriptor), caso erro retorna -1
-   
+
       O numero do protocolo (protocol_number):
    		0 - IP - Internet Protocol (Default)
-   */ 
+   */
    if ((conListener->socketvar = socket(AF_INET, SOCK_STREAM, 0)) == -1)
    {
      perror("Error creating socket");
      return -2;
    }
-   
+
    /* Funcao setsockopt(int socket, int level, int optname, void*optval, size_t optlen)
-   
+
 	Esta funcao seta o valor (optval) de uma opcao (optname) em um certo nivel (level) de camada de protocolo no socket
-	
+
 	int socket = descriptor do socket
-   	
+
 	int level = nivel da camada do protocolo (SOL_SOCKET = Constante de nivel para o socket)
-   	
+
 	int optname = Opcao desejada para a alteracao
-   
+
 	optval = valor da opcao
-   
+
 	optlen = tamanho do valor
 
    */
@@ -70,9 +70,9 @@ int connections_listenerCreate(connectionListener *conListener, int port)
     conListener->addr.sin_port = htons(port);
     conListener->addr.sin_addr.s_addr = INADDR_ANY;
     bzero(&(conListener->addr.sin_zero),8);
-   
+
     /* Uma vez com o socket criado precisamos informar o endereço ao socket. Para isso utilizamos a funcao bind
-   
+
 	    Funcao bind(int socket, struct sockaddr*addr, size_t length)
 
    	    int socket = descriptor do socket
@@ -93,11 +93,11 @@ int connections_listenerCreate(connectionListener *conListener, int port)
          porta especificada. A funcao listen realiza essa tarefa.
 
    	    Funcao listen(int socket, unsigned int n) onde;
-   	
+
 	    int socket = descriptor do socket
 
    	    unsigned int n = tamanho da fila de conexoes pendentes
-   
+
     */
     if (listen(conListener->socketvar, 10) == -1)
     {
@@ -117,10 +117,10 @@ void *connections_listen(void *data)
 
     // Representa o novo contato conectando
     struct sockaddr_in client_addr;
-    int sin_size;
+    socklen_t sin_size;
     // Socket criada para essa conexao
     int connected;
-    
+
     // Enquanto o programa nao for fechado
     while(running)
     {
@@ -129,13 +129,13 @@ void *connections_listen(void *data)
 
         /* Funcao accept(int socket, struct sockaddr*addr, size_t*length_ptr)
 	        A funcao accept aceita uma conexao e cria um novo socket para esta conexao
-      	
+
 	        int socket = descriptor do socket
-      
+
 	        struct sockaddr*addr = endereco de destino (cliente)
-      
+
 	        size_t*length_ptr = tamanho do endereco de destino
-        */ 
+        */
         connected = accept(conListener->socketvar, (struct sockaddr *)&client_addr, &sin_size);
 
         // Representa o contato que acabou de conectar
@@ -163,7 +163,7 @@ void *connections_listen(void *data)
     }
 
     close(conListener->socketvar);
-    
+
     pthread_exit(0);
 }
 
@@ -177,7 +177,7 @@ int connections_connect(contact *newContact, int port)
     // Representa o nó atual
     struct sockaddr_in server_addr;
 
-    if(newContact = 0)
+    if(newContact == 0)
     {
         perror("Contact not allocated");
         return -1;
@@ -197,7 +197,7 @@ int connections_connect(contact *newContact, int port)
             return -2;
         }
     }
-    
+
     // Se esse nickname ja esta na lista, verifica se ainda esta conectado
     aux_Contact = hash_retrieveContact(newContact->nickname);
     if(aux_Contact != NULL)
@@ -212,10 +212,10 @@ int connections_connect(contact *newContact, int port)
             return -3;
         }
     }
-    
+
     // Obtem o host a partir de host_name
     host = gethostbyname(newContact->host_name);
-    
+
     // Cria a socket
     if ((newContact->socketvar = socket(AF_INET, SOCK_STREAM, 0)) == -1)
     {
@@ -228,7 +228,7 @@ int connections_connect(contact *newContact, int port)
     server_addr.sin_port = htons(port);
     server_addr.sin_addr = *((struct in_addr *)host->h_addr);
     bzero(&(server_addr.sin_zero),8);
-  
+
     // Tenta conectar com o contato
     if (connect(newContact->socketvar, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)) == -1)
     {

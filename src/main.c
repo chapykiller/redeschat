@@ -8,9 +8,11 @@
 
 int main()
 {
-    connectionListener *conListener;
+    connectionListener *conListener = NULL;
 
     running = 1;
+
+    thread_init();
 
     pthread_mutex_init(&hashMutex, NULL);
 
@@ -18,6 +20,11 @@ int main()
 
     pthread_create(createThread(), 0, connections_listen, (void*)conListener);
     pthread_create(createThread(), 0, broadcast_alive, NULL);
+
+	threadNode *current;
+    for(current = threadList; current!=NULL; current = current->next){
+            pthread_join(current->thread);
+    }
 
     free(conListener);
 

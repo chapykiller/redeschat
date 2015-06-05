@@ -171,4 +171,6 @@ int interface_init(){
 
 		free(input);
 	}
+
+	return 0;
 }
