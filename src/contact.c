@@ -7,9 +7,9 @@
 
 contact * contact_create(const char *nickname, const char *host_name)
 {
-	contact * ret;
+	contact * ret = (contact*)malloc(sizeof(contact));
 
-    if(ret = (contact*)malloc(sizeof(contact)))
+    if(ret == NULL)
     {
         perror("Error allocating contact");
         return NULL;
