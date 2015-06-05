@@ -6,8 +6,8 @@
 
 typedef struct sContact
 {
-    char host_name[30];
-    char nickname[20];
+    char host_name[31];
+    char nickname[21];
 
     int status;
     int lastUpdate;
