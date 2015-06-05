@@ -16,7 +16,7 @@ typedef struct sConnectionListener
 /*
  * Aloca e inicializa uma struct usada para ouvir por conexões
 */
-int connections_listenerCreate(connectionListener *conListener, int port);
+int connections_listenerCreate(connectionListener **conListener, int port);
 
 /*
  * Thread responsavel por ficar aguardando novas conexoes

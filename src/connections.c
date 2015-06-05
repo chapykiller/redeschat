@@ -20,9 +20,9 @@
 /*
  * Aloca e inicializa uma struct usada para ouvir por conexões
 */
-int connections_listenerCreate(connectionListener *conListener, int port)
+int connections_listenerCreate(connectionListener **conListener, int port)
 {
-    conListener = (connectionListener*)malloc( sizeof(connectionListener) );
+    *conListener = (connectionListener*)malloc( sizeof(connectionListener) );
     if(conListener == 0)
     {
         perror("Error allocating connection listener.");
@@ -30,15 +30,15 @@ int connections_listenerCreate(connectionListener *conListener, int port)
     }
 
     // Coloca o timeout do recv como 1 segundo
-    conListener->timev.tv_sec = 1;
-    conListener->timev.tv_usec = 0;
+    (*conListener)->timev.tv_sec = 1;
+    (*conListener)->timev.tv_usec = 0;
 
    /* Funcao socket(sin_family,socket_type,protocol_number) retorna um inteiro (socket descriptor), caso erro retorna -1
 
       O numero do protocolo (protocol_number):
    		0 - IP - Internet Protocol (Default)
    */
-   if ((conListener->socketvar = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+   if (((*conListener)->socketvar = socket(AF_INET, SOCK_STREAM, 0)) == -1)
    {
      perror("Error creating socket");
      return -2;
@@ -59,17 +59,17 @@ int connections_listenerCreate(connectionListener *conListener, int port)
 	optlen = tamanho do valor
 
    */
-   if (setsockopt(conListener->socketvar, SOL_SOCKET, SO_REUSEADDR, (char*)&conListener->timev,sizeof(struct timeval)) == -1)
+   if (setsockopt((*conListener)->socketvar, SOL_SOCKET, SO_REUSEADDR, (char*)&(*conListener)->timev,sizeof(struct timeval)) == -1)
    {
       perror("Error in Setsockopt");
       return -3;
    }
 
     // Configura o endereco de destino
-    conListener->addr.sin_family = AF_INET;
-    conListener->addr.sin_port = htons(port);
-    conListener->addr.sin_addr.s_addr = INADDR_ANY;
-    bzero(&(conListener->addr.sin_zero),8);
+    (*conListener)->addr.sin_family = AF_INET;
+    (*conListener)->addr.sin_port = htons(port);
+    (*conListener)->addr.sin_addr.s_addr = INADDR_ANY;
+    bzero(&((*conListener)->addr.sin_zero),8);
 
     /* Uma vez com o socket criado precisamos informar o endereço ao socket. Para isso utilizamos a funcao bind
 
@@ -83,7 +83,7 @@ int connections_listenerCreate(connectionListener *conListener, int port)
 
    	    A funcao bind retorna 0 em caso de sucesso e -1 em caso de erro
     */
-    if (bind(conListener->socketvar, (struct sockaddr *)&conListener->addr, sizeof(struct sockaddr)) == -1)
+    if (bind((*conListener)->socketvar, (struct sockaddr *)&(*conListener)->addr, sizeof(struct sockaddr)) == -1)
     {
         perror("Impossible to bind");
         return -4;
@@ -99,7 +99,7 @@ int connections_listenerCreate(connectionListener *conListener, int port)
    	    unsigned int n = tamanho da fila de conexoes pendentes
 
     */
-    if (listen(conListener->socketvar, 10) == -1)
+    if (listen((*conListener)->socketvar, 10) == -1)
     {
         perror("Error in Listen");
         return -5;
