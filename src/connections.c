@@ -193,6 +193,8 @@ void *connections_listen(void *data)
 
                     // Adiciona para a lista ligada
                     queueContact(newContact);
+
+                    pthread_create(createThread(), 0, message_receive, (void*)newContact);
                 }
             }
         }

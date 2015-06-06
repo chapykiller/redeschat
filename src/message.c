@@ -73,9 +73,9 @@ void *message_receive(void *data)
             */
             if( (time(NULL) - sender->lastUpdate) > 40)
             {
-                sender->status = STATUS_DEAD; // O nó disconectou
-                close(sender->socketvar); // Fecha o socket
-                pthread_exit(0);
+                //sender->status = STATUS_DEAD; // O nó disconectou
+                //close(sender->socketvar); // Fecha o socket
+                //pthread_exit(0);
             }
         }
         else
@@ -99,7 +99,7 @@ void *message_receive(void *data)
             {
                 // Obtem uma mensagem json valida
                 json_message = validateJSON(aux_recvData, &length);
-                
+
                 // Se a mensagem não for valida ou chegou ao fim da string
                 if(json_message == NULL)
                 {
@@ -127,6 +127,6 @@ void *message_receive(void *data)
 
         sleep(1);
     }
-    
+
     pthread_exit(0);
 }

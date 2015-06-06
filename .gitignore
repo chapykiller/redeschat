@@ -28,6 +28,11 @@
 *.x86_64
 *.hex
 Chat
+redeschat
 
 # Debug files
 *.dSYM/
+
+*.depend
+*.layout
+*.cbp
