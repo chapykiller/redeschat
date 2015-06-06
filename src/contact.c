@@ -57,6 +57,8 @@ void queueContact(contact * host){
 
 	newNode->next = contactQueue;
 
+	contactQueue = newNode;
+
 	pthread_mutex_unlock(&queueMutex);
 
 	return;

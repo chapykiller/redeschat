@@ -299,11 +299,23 @@ void processInboundConnections(contact * var){
 						}else{
 							contact * contact_by_nick = hash_retrieveContact(nickname);
 
-							if(contact_by_nick != NULL && contact_by_nick->status == STATUS_ALIVE){
-								printf("A contact with this name already exists.");
+							if(contact_by_nick != NULL) {
+                                if(contact_by_nick->status == STATUS_ALIVE){
+                                    printf("A contact with this name already exists.");
+                                }else{
+                                    hash_removeContact(contact_by_nick->nickname);
+                                    hash_removeContact(contact_by_nick->host_name);
+
+                                    valid = 1;
+                                    strcpy(var->nickname, nickname);
+
+                                    hash_addContact(var, nickname);
+                                }
 							}else{
 								valid = 1;
 								strcpy(var->nickname, nickname);
+
+								hash_addContact(var, nickname);
 							}
 						}
 					}
@@ -415,6 +427,8 @@ int interface_init(){
 
 						char * json_msg = makeJSONMessage(input);
 						message_send(target, json_msg);
+
+						printf("%s", seq);
 
 						//free(msg);
 					}
