@@ -58,8 +58,14 @@ char * validateJSON(char * arg, int * n){
 			ret[i] = arg[i];
 
 			if(arg[i]=='}'||arg[i]==']'){
-				if(arg[i]!=stack[stackpos])
-					perror("JSON HAS ERRORS!");
+                if(arg[i] == '}'){
+                    if(stack[stackpos] != '{')
+                        perror("JSON HAS ERRORS!");
+                }
+                else{
+                    if(stack[stackpos] != '[')
+                        perror("JSON HAS ERRORS!");
+                }
 
 				stackpos--;
 
@@ -73,6 +79,23 @@ char * validateJSON(char * arg, int * n){
 				return ret;
 			}
 		}
+		else
+        {
+            if(i+1>=size){
+				char * newret = (char *)malloc(size*2*sizeof(char));
+
+				for(j=0; j<size; j++){
+					newret[j] = ret[j];
+				}
+
+				size *= 2;
+				free(ret);
+
+				ret = newret;
+			}
+
+			ret[i] = arg[i];
+        }
 	}
 
 	free(stack);
@@ -86,7 +109,7 @@ char * validateJSON(char * arg, int * n){
 char * makeJSONMessage(char * string){
 	json_t * array = json_array();
 
-	json_t * type_j = json_integer(TYPECONTROL);
+	json_t * type_j = json_integer(TYPEMESSAGE);
 	json_t * messageType_j = json_string(string);
 
 	json_array_append_new(array, type_j);
