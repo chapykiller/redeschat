@@ -37,6 +37,7 @@ int connections_listenerCreate(connectionListener **conListener, int port)
    */
    if (((*conListener)->socketvar = socket(AF_INET, SOCK_STREAM, 0)) == -1)
    {
+     free(*conListener);
      perror("Error creating socket");
      return -2;
    }
@@ -60,6 +61,8 @@ int connections_listenerCreate(connectionListener **conListener, int port)
    */
    if (setsockopt((*conListener)->socketvar, SOL_SOCKET, SO_REUSEADDR, (char*)&true, sizeof(int)) == -1)
    {
+      close((*conListener)->socketvar);
+      free(*conListener);
       perror("Error in Setsockopt");
       return -3;
    }
@@ -84,6 +87,8 @@ int connections_listenerCreate(connectionListener **conListener, int port)
     */
     if (bind((*conListener)->socketvar, (struct sockaddr *)&(*conListener)->addr, sizeof(struct sockaddr)) == -1)
     {
+        close((*conListener)->socketvar);
+        free(*conListener);
         perror("Impossible to bind");
         return -4;
     }
@@ -100,6 +105,8 @@ int connections_listenerCreate(connectionListener **conListener, int port)
     */
     if (listen((*conListener)->socketvar, 10) == -1)
     {
+        close((*conListener)->socketvar);
+        free(*conListener);
         perror("Error in Listen");
         return -5;
     }
@@ -148,27 +155,29 @@ void *connections_listen(void *data)
 	            size_t*length_ptr = tamanho do endereco de destino
             */
             connected = accept(conListener->socketvar, (struct sockaddr *)&client_addr, &sin_size);
-
-            // Representa o contato que acabou de conectar
-            contact *newContact;
-            // IP ou endereco desse contato
-            char host_name[30];
-
-            // Salva o host_name do contato
-            inet_ntop(AF_INET, &(client_addr.sin_addr), host_name, INET_ADDRSTRLEN);
-
-            // Aloca e atribui os valores em newContact
-            newContact = contact_create("", host_name);
-            if(newContact != NULL)
+            if(connected != 1)
             {
-                // Adiciona o contato na tabela hash usando host_name como chave
-                hash_addContact(newContact, newContact->host_name);
+                // Representa o contato que acabou de conectar
+                contact *newContact;
+                // IP ou endereco desse contato
+                char host_name[30];
 
-                // Atribui o socket
-                newContact->socketvar = connected;
+                // Salva o host_name do contato
+                inet_ntop(AF_INET, &(client_addr.sin_addr), host_name, INET_ADDRSTRLEN);
+
+                // Aloca e atribui os valores em newContact
+                newContact = contact_create("", host_name);
+                if(newContact != NULL)
+                {
+                    // Adiciona o contato na tabela hash usando host_name como chave
+                    hash_addContact(newContact, newContact->host_name);
+
+                    // Atribui o socket
+                    newContact->socketvar = connected;
             
-                // Adiciona para a lista ligada
-                queueContact(newContact);
+                    // Adiciona para a lista ligada
+                    queueContact(newContact);
+                }
             }
         }
 
