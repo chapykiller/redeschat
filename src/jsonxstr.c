@@ -20,6 +20,10 @@ char * validateJSON(char * arg, int * n){
 	int instring = 0;
 
 	for(i=0; arg[i]!='\0'; i++){
+		if(arg[i]=='"' && (i == 0 || arg[i-1]!='\\')){
+			instring = !instring;
+		}
+
 		if(!instring){
 			if(arg[i]=='{' || arg[i]=='['){
 
@@ -35,7 +39,7 @@ char * validateJSON(char * arg, int * n){
 					stack = newstack;
 				}
 
-				stack[stackpos] = arg[j];
+				stack[stackpos] = arg[i];
 			}
 
 			if(i+1>=size){
