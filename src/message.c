@@ -73,9 +73,9 @@ void *message_receive(void *data)
             */
             if( (time(NULL) - sender->lastUpdate) > 40)
             {
-                //sender->status = STATUS_DEAD; // O nó disconectou
-                //close(sender->socketvar); // Fecha o socket
-                //pthread_exit(0);
+                sender->status = STATUS_DEAD; // O nó disconectou
+                close(sender->socketvar); // Fecha o socket
+                pthread_exit(0);
             }
         }
         else
