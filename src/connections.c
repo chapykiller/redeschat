@@ -9,14 +9,12 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
-#include <pthread.h>
 #include <fcntl.h>
 
 #include "running.h"
 #include "connections.h"
 #include "contact.h"
 #include "hashTable.h"
-#include "threadManagement.h"
 #include "message.h"
 
 /*
@@ -185,16 +183,11 @@ void *connections_listen(void *data)
                 newContact = contact_create("", host_name);
                 if(newContact != NULL)
                 {
-                    // Adiciona o contato na tabela hash usando host_name como chave
-                    hash_addContact(newContact, newContact->host_name);
-
                     // Atribui o socket
                     newContact->socketvar = connected;
 
                     // Adiciona para a lista ligada
                     queueContact(newContact);
-
-                    pthread_create(createThread(), 0, message_receive, (void*)newContact);
                 }
             }
         }
@@ -262,8 +255,6 @@ int connections_connect(contact *newContact, int port)
         perror("Error during connect");
         return -5;
     }
-
-    pthread_create(createThread(), 0, message_receive, (void*)newContact);
 
     return 0;
 }

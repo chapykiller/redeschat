@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "hashTable.h"
 #include "contact.h"
@@ -10,7 +11,7 @@ int cmp(const char * s1, const char * s2)
 {
     int i;
 
-    for(i=0; s1[i]==s2[i] && s1[i]!='\0'; i++);
+    for(i=0; s1[i]==s2[i] && s1[i]!='\0' && s2[i]!='\0'; i++);
     return s1[i]==s2[i];
 }
 
@@ -64,13 +65,9 @@ int hash_addContact(contact * newcontact, char * key)
     hashNode * newNode = (hashNode *)malloc(sizeof(hashNode));
     newNode->nodeContact = newcontact;
 
-    int i, n;
-    for(n=0; key[n]!='\0'; n++);
+    newNode->key = (char *)malloc((strlen(key)+1)*sizeof(char));
 
-    newNode->key = (char *)malloc(n*sizeof(char));
-
-    for(i=0; i<n; i++)
-        newNode->key[i] = key[i];
+    strcpy(newNode->key, key);
 
     pthread_mutex_lock(&hashMutex);
 
@@ -122,13 +119,29 @@ void hash_removeContact(char * key)
 
             current->next = current->next->next;
 
-            if(temp->nodeContact->references-- == 0)
+            if(--temp->nodeContact->references == 0)
             {
+                pthread_mutex_destroy(&temp->nodeContact->messageMutex);
                 free(temp->nodeContact);
             }
+            free(temp->key);
             free(temp);
         }
+    }
 
+    if(cmp(key, contactTable.table[hash]->key))
+    {
+        hashNode * temp = contactTable.table[hash]->next;
+
+        if(--contactTable.table[hash]->nodeContact->references == 0)
+        {
+            pthread_mutex_destroy(&contactTable.table[hash]->nodeContact->messageMutex);
+            free(contactTable.table[hash]->nodeContact);
+        }
+        free(contactTable.table[hash]->key);
+        free(contactTable.table[hash]);
+
+        contactTable.table[hash] = temp;
     }
 
     pthread_mutex_unlock(&hashMutex);
@@ -165,6 +178,9 @@ void hash_exit()
         {
             if(previous->status == STATUS_ALIVE)
                 close(previous->socketvar);
+
+            hash_removeContact(previous->nickname);
+            hash_removeContact(previous->host_name);
         }
 
         previous = current;
@@ -193,25 +209,8 @@ void hash_exit()
         if(previous->status == STATUS_ALIVE)
             close(previous->socketvar);
 
-        pthread_mutex_destroy(&previous->messageMutex);
-        free(previous);
-    }
-
-    hashNode *hashcurrent;
-    hashNode *hashprevious = NULL;
-    for(hashcurrent = *contactTable.table; hashcurrent!=NULL; hashcurrent = hashcurrent->next)
-    {
-        if(hashprevious != NULL)
-        {
-            free(hashprevious);
-        }
-
-        hashprevious = hashcurrent;
-    }
-
-    if(hashprevious != NULL)
-    {
-        free(hashprevious);
+        hash_removeContact(previous->nickname);
+        hash_removeContact(previous->host_name);
     }
 
     free(contactTable.table);

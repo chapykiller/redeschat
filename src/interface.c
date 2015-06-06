@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <jansson.h>
+#include <pthread.h>
 
 #include "running.h"
 #include "hashTable.h"
@@ -10,6 +11,7 @@
 #include "message.h"
 #include "contact.h"
 #include "broadcast.h"
+#include "threadManagement.h"
 
 char messageTarget[31];
 
@@ -117,13 +119,15 @@ void displayContacts(char seq[]){
 void addContact(char * input, char seq[]){
 	int narg;
 	char ** args = decompose(input, &narg);
-
-	char * hostname = args[1];
-	char * nickname = args[2];
+	char * hostname = NULL;
+	char * nickname = NULL;
 
 	if(narg != 3){
 		printf("Syntax is wrong. Please consult /help if you need to.%s", seq);
 	}else{
+	    hostname = args[1];
+        nickname = args[2];
+
 		if(!checkNickname(nickname)){
 			printf("Nickname cotains illegal characters. Please use only letters and numbers.%s", seq);
 		}else{
@@ -152,11 +156,17 @@ void addContact(char * input, char seq[]){
 
 						if(connections_connect(newContact, 48691) < 0){
 							printf("Failed to estabilish connection.%s", seq);
+							pthread_mutex_destroy(&newContact->messageMutex);
+							free(newContact);
 						}
 						else
                         {
+                            newContact->status = STATUS_ALIVE;
+
                             hash_addContact(newContact, nickname);
                             hash_addContact(newContact, hostname);
+
+                            pthread_create(createThread(), 0, message_receive, (void*)newContact);
 
                             printf("Contact added to the friend list.%s", seq);
                         }
@@ -176,13 +186,15 @@ void doMsg(char * input, char seq[]){
 	int narg;
 	char ** args = decompose(input, &narg);
 
-	char * arg1 = args[1];
-	char * arg2 = args[2];
+	char * arg1 = NULL;
+	char * arg2 = NULL;
 
 	if(narg < 2 || narg > 3){
 
 		printf("Syntax is wrong. Please consult /help if you need to.%s", seq);
 	}else{
+	    arg1 = args[1];
+
 		contact * target = hash_retrieveContact(arg1);
 
 		if(target == NULL){
@@ -195,10 +207,12 @@ void doMsg(char * input, char seq[]){
 					strcpy(messageTarget, arg1);
 					printf("%s", seq);
 				}else{
+				    arg2 = args[2];
 					addMessage(target, "You", arg2);
 
 					char * json_msg = makeJSONMessage(arg2);
 					message_send(target, json_msg);
+					free(json_msg);
 
 					printf("%s", seq);
 				}
@@ -310,13 +324,25 @@ void processInboundConnections(contact * var){
                                     valid = 1;
                                     strcpy(var->nickname, nickname);
 
+                                    var->status = STATUS_ALIVE;
+
                                     hash_addContact(var, nickname);
+                                    // Adiciona o contato na tabela hash usando host_name como chave
+                                    hash_addContact(var, var->host_name);
+
+                                    pthread_create(createThread(), 0, message_receive, (void*)var);
                                 }
 							}else{
 								valid = 1;
 								strcpy(var->nickname, nickname);
 
+								var->status = STATUS_ALIVE;
+
 								hash_addContact(var, nickname);
+								// Adiciona o contato na tabela hash usando host_name como chave
+                                hash_addContact(var, var->host_name);
+
+								pthread_create(createThread(), 0, message_receive, (void*)var);
 							}
 						}
 					}
@@ -428,6 +454,7 @@ int interface_init(){
 
 						char * json_msg = makeJSONMessage(input);
 						message_send(target, json_msg);
+						free(json_msg);
 
 						printf("%s", seq);
 
