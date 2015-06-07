@@ -228,13 +228,15 @@ void doMsg(char * input, char seq[]){
 void displayMessages(char * input, char seq[]){
 	int narg;
 	char ** args = decompose(input, &narg);
-
-	char * arg1 = args[1];
+	
+    char * arg1 = NULL;
 
 	if(narg != 2){
 		printf("Syntax is wrong. Please consult /help.%s", seq);
 	}else{
-		contact * target = hash_retrieveContact(arg1);
+	    arg1 = args[1];
+		
+        contact * target = hash_retrieveContact(arg1);
 
 		if(target == NULL){
 			printf("Contact is missing. Review your parameters.%s", seq);

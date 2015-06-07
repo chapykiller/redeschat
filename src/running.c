@@ -32,6 +32,4 @@ void stopRunning(){
 	running = 0;
 
 	pthread_mutex_unlock(&runningMutex);
-
-	pthread_mutex_destroy(&runningMutex);
 }

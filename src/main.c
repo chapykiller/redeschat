@@ -48,6 +48,8 @@ int main()
     free(conListener);
     contact_exit();
     hash_exit();
+	
+    pthread_mutex_destroy(&runningMutex);
 
     return 0;
 }
