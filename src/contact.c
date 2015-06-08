@@ -41,6 +41,8 @@ void addMessage(contact * cont, const char * origin, char * message){
 				free(temp->message);
 				free(temp);
 			}
+
+			break;
 		}
 	}
 

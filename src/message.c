@@ -61,7 +61,7 @@ void *message_receive(void *data)
             }
 
             // Recebe os dados
-            bytes_recv = recv(sender->socketvar, recv_data, MESSAGE_MAXSIZE, 0);
+            bytes_recv = recv(sender->socketvar, recv_data, MESSAGE_MAXSIZE-1, 0);
 
             // Se ocorreu timeout, checa se o cliente pode estar disconectado
             if(bytes_recv == 0)
@@ -86,17 +86,21 @@ void *message_receive(void *data)
                 char *aux_recvData;
 
                 // Tranforma os dados recebidos em uma string valida
-                recv_data[bytes_recv] = '\0';
+                recv_data[bytes_recv] = '\0'; 
                 // Concatena a mensagem incompleta do recv anterior com os dados do recv atual
                 strcat(cat_message, recv_data);
 
                 // Comeca apontado para a primeira posicao de cat_message
                 aux_recvData = cat_message;
 
+                char * cat_limit = cat_message + strlen(cat_message);
+
                 do
                 {
                     // Obtem uma mensagem json valida
                     json_message = validateJSON(aux_recvData, &length);
+
+                    printf("\nrecv_data: %s\n", recv_data);
 
                     // Se a mensagem não for valida ou chegou ao fim da string
                     if(json_message == NULL)
@@ -110,10 +114,10 @@ void *message_receive(void *data)
                     else
                     {
                         // Desloca para a proxima mensagem
-                        aux_recvData += length + 1;
+                        aux_recvData += length;
                         // Se ultrapassou o limite do buffer faz apontar para o final dele
-                        if( (aux_recvData - (cat_message + strlen(cat_message))) >= 0)
-                            aux_recvData = cat_message + strlen(cat_message);
+                        if( (aux_recvData - cat_limit) >= 0)
+                            aux_recvData = cat_limit;
 
                         // Transforma a mensagem json em uma mensagem normal
                         decodeJSON(json_message, sender);

@@ -24,6 +24,21 @@ char * validateJSON(char * arg, int * n){
 			instring = !instring;
 		}
 
+		if(i+1>=size){
+			char * newret = (char *)malloc(size*2*sizeof(char));
+
+			for(j=0; j<size; j++){
+				newret[j] = ret[j];
+			}
+
+			size *= 2;
+			free(ret);
+
+			ret = newret;
+		}
+
+		ret[i] = arg[i];
+
 		if(!instring){
 			if(arg[i]=='{' || arg[i]=='['){
 
@@ -41,21 +56,6 @@ char * validateJSON(char * arg, int * n){
 
 				stack[stackpos] = arg[i];
 			}
-
-			if(i+1>=size){
-				char * newret = (char *)malloc(size*2*sizeof(char));
-
-				for(j=0; j<size; j++){
-					newret[j] = ret[j];
-				}
-
-				size *= 2;
-				free(ret);
-
-				ret = newret;
-			}
-
-			ret[i] = arg[i];
 
 			if(arg[i]=='}'||arg[i]==']'){
                 if(arg[i] == '}'){
@@ -79,23 +79,6 @@ char * validateJSON(char * arg, int * n){
 				return ret;
 			}
 		}
-		else
-        {
-            if(i+1>=size){
-				char * newret = (char *)malloc(size*2*sizeof(char));
-
-				for(j=0; j<size; j++){
-					newret[j] = ret[j];
-				}
-
-				size *= 2;
-				free(ret);
-
-				ret = newret;
-			}
-
-			ret[i] = arg[i];
-        }
 	}
 
 	free(stack);
