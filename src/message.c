@@ -100,7 +100,7 @@ void *message_receive(void *data)
                     // Obtem uma mensagem json valida
                     json_message = validateJSON(aux_recvData, &length);
 
-                    printf("\nrecv_data: %s\n", recv_data);
+                    printf("\nrecv_data: %s\naux_recvData: %s\n", recv_data, aux_recvData);
 
                     // Se a mensagem não for valida ou chegou ao fim da string
                     if(json_message == NULL)
