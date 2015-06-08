@@ -93,8 +93,6 @@ void *message_receive(void *data)
                 // Comeca apontado para a primeira posicao de cat_message
                 aux_recvData = cat_message;
 
-                char * cat_limit = cat_message + strlen(cat_message);
-
                 do
                 {
                     // Obtem uma mensagem json valida
