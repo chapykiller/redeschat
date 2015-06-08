@@ -64,7 +64,7 @@ void *message_receive(void *data)
             bytes_recv = recv(sender->socketvar, recv_data, MESSAGE_MAXSIZE-1, 0);
 
             // Se ocorreu timeout, checa se o cliente pode estar disconectado
-            if(bytes_recv == 0)
+            if(bytes_recv <= 0)
             {
                 /* Se passou mais de 40 segundos desde a ultima mensagem
                     do nó, seja ela uma mensagem normal ou de controle

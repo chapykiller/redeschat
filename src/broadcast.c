@@ -38,9 +38,11 @@ void *broadcast_alive(void *data)
     while(isRunning())
     {
         if( (time(NULL) - last_update) >= 30)
+        {
             broadcast_send(aliveMessage);
 
-        time(&last_update);
+            time(&last_update);
+        }
 
         sleep(1);
     }
