@@ -115,9 +115,6 @@ void *message_receive(void *data)
                     {
                         // Desloca para a proxima mensagem
                         aux_recvData += length;
-                        // Se ultrapassou o limite do buffer faz apontar para o final dele
-                        if( (aux_recvData - cat_limit) >= 0)
-                            aux_recvData = cat_limit;
 
                         // Transforma a mensagem json em uma mensagem normal
                         decodeJSON(json_message, sender);
