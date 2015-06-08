@@ -31,14 +31,14 @@ void *broadcast_alive(void *data)
 {
     time_t last_update;
 
-    char *aliveMessage = makeJSONMessage(0);
+    char *aliveMessage = makeJSONControl(0);
 
     time(&last_update);
 
     while(isRunning())
     {
         if( (time(NULL) - last_update) >= 30)
-        broadcast_send(aliveMessage);
+            broadcast_send(aliveMessage);
 
         time(&last_update);
 
