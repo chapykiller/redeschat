@@ -143,5 +143,7 @@ void decodeJSON(char * message, contact *sender){
 		perror("MESSAGE WITH INVALID TYPE!");
 	}
 
+    json_decref(root);
+
 	return;
 }

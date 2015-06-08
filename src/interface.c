@@ -351,6 +351,8 @@ void processInboundConnections(contact * var){
 				}
 			}
 		}while(!valid);
+
+		free(nickname);
 	}
 
 	printf("\n");
