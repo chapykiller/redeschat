@@ -186,8 +186,22 @@ void *connections_listen(void *data)
                     // Atribui o socket
                     newContact->socketvar = connected;
 
+                    // Coloca o timeout do recv como 1 segundo
+                    struct timeval timeout;
+                    timeout.tv_sec = 1;
+                    timeout.tv_usec = 0;
+
+                    if (setsockopt(newContact->socketvar, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(struct timeval)) == -1)
+                    {
+                        perror("Error in Setsockopt");
+                    }
+    
                     // Adiciona para a lista ligada
                     queueContact(newContact);
+                }
+                else
+                {
+                    close(connected);
                 }
             }
         }
