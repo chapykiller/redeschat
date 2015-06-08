@@ -162,6 +162,7 @@ void addContact(char * input, char seq[]){
 						else
                         {
                             newContact->status = STATUS_ALIVE;
+                            newContact->lastUpdate = time(NULL);
 
                             hash_addContact(newContact, nickname);
                             hash_addContact(newContact, hostname);
@@ -327,6 +328,7 @@ void processInboundConnections(contact * var){
                                     strcpy(var->nickname, nickname);
 
                                     var->status = STATUS_ALIVE;
+                                    var->lastUpdate = time(NULL);
 
                                     hash_addContact(var, nickname);
                                     // Adiciona o contato na tabela hash usando host_name como chave
@@ -339,6 +341,7 @@ void processInboundConnections(contact * var){
 								strcpy(var->nickname, nickname);
 
 								var->status = STATUS_ALIVE;
+                                var->lastUpdate = time(NULL);
 
 								hash_addContact(var, nickname);
 								// Adiciona o contato na tabela hash usando host_name como chave
