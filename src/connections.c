@@ -200,8 +200,7 @@ void *connections_listen(void *data)
 
 				    if(contact_by_host == NULL || contact_by_host->status == STATUS_DEAD)
                     {
-                        contactNode *search_node;
-	                    int ignore = 0;
+                        contactNode *search_node, *previous_node;
 
                         pthread_mutex_lock(&queueMutex);
 
@@ -209,24 +208,26 @@ void *connections_listen(void *data)
                         {
                             if(strcmp(search_node->value->host_name, host_name) == 0)
                             {
-                                ignore = 1;
+                                previous_node->next = search_node->next;
                                 break;
                             }
+
+                            previous_node = search_node;
                         }
 
                         pthread_mutex_unlock(&queueMutex);
 
-                        if(ignore == 0)
+                        if(search_node != NULL)
                         {
-                            // Adiciona para a lista ligada
-                            queueContact(newContact);
+                            close(search_node->value->socketvar);
+                            pthread_mutex_destroy(&search_node->value->messageMutex);
+                            free(search_node->value);
+
+                             free(search_node);
                         }
-                        else
-                        {
-                            close(connected);
-                            pthread_mutex_destroy(&newContact->messageMutex);
-                            free(newContact);
-                        }
+                        
+                        // Adiciona para a lista ligada
+                        queueContact(newContact);
                     }
                     else
                     {
