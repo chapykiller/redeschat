@@ -195,9 +195,33 @@ void *connections_listen(void *data)
                     {
                         perror("Error in Setsockopt");
                     }
-    
-                    // Adiciona para a lista ligada
-                    queueContact(newContact);
+
+				    contact *contact_by_host = hash_retrieveContact(host_name);
+
+				    if(contact_by_host == NULL || contact_by_host->status == STATUS_ALIVE)
+                    {
+                        contactNode *search_node = NULL;
+	                    int ignore = 0;
+
+                        pthread_mutex_lock(&queueMutex);
+                       
+                        for(search_node = contactQueue; search_node != NULL; search_node = search_node->next)
+                        {
+                            if(strcmp(search_node->value->host_name, host_name) == 0)
+                            {
+                                ignore = 1;
+                                search_node = NULL;
+                            }
+                        }
+	
+                        pthread_mutex_unlock(&queueMutex);
+                        
+                        if(ignore == 0)
+                        {
+                            // Adiciona para a lista ligada
+                            queueContact(newContact);
+                        }
+                    }
                 }
                 else
                 {

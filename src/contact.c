@@ -9,7 +9,10 @@
 void addMessage(contact * cont, const char * origin, char * message){
 	pthread_mutex_lock(&cont->messageMutex);
 
-	struct tm * timestr = localtime(time(NULL));
+	time_t rawtime;
+    time(&rawtime);
+
+    struct tm * timestr = localtime(&rawtime);
 
 	char * copy = (char *)malloc(561*sizeof(char));
 	sprintf(copy, "[%02d:%02d] ", timestr->tm_hour, timestr->tm_min);

@@ -106,6 +106,11 @@ void displayContacts(char seq[]){
 				printf(" - %s > %s\n", current->host_name, current->nickname);
 				count++;
             }
+            else
+            {
+				printf(" - %s > %s (offline)\n", current->host_name, current->nickname);
+				count++;
+            }
 		}
 
 		printf("\nListed a total of %d contacts.%s", count, seq);
@@ -507,11 +512,11 @@ int interface_init(){
 							int removeFromList = 0;
 
 							if(target == NULL){
-								printf("%s no longer exists.%s", seq);
+								printf("%s no longer exists.%s", messageTargets[i], seq);
 								removeFromList = 1;
 							}else{
 								if(target->status == STATUS_DEAD){
-									printf("%s has disconnected. Message not sent.%s", seq);
+									printf("%s has disconnected. Message not sent.%s", messageTargets[i], seq);
 									removeFromList = 1;
 								}else{
 									addMessage(target, "You", input);
