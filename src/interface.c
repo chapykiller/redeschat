@@ -13,7 +13,9 @@
 #include "broadcast.h"
 #include "threadManagement.h"
 
-char messageTarget[31];
+char ** messageTargets;
+int targetAmount;
+int broadcasting;
 
 int checkNickname(char * nick){
 	int i;
@@ -187,38 +189,73 @@ void doMsg(char * input, char seq[]){
 	int narg;
 	char ** args = decompose(input, &narg);
 
-	char * arg1 = NULL;
-	char * arg2 = NULL;
-
-	if(narg < 2 || narg > 3){
+	if(narg < 2){
 
 		printf("Syntax is wrong. Please consult /help if you need to.%s", seq);
 	}else{
-	    arg1 = args[1];
+		int i, j;
 
-		contact * target = hash_retrieveContact(arg1);
+		int nowBroadcasting = 0;
+		contact ** list = (contact **)malloc((narg-1)*sizeof(contact *));
+		int listIndex = 0;
 
-		if(target == NULL){
-			printf("Contact is missing. Review your parameters.%s", seq);
-		}else{
-			if(target->status == STATUS_DEAD)
-				printf("Contact is down. Oh well.%s", seq);
-			else{
-				if(narg == 2){
-					strcpy(messageTarget, arg1);
-					printf("%s", seq);
+		for(i=1; i<narg; i++){
+			if(strcmp(args[i], "broadcast")){
+				nowBroadcasting = 1;
+			}else{
+				contact * target = hash_retrieveContact(args[i]);
+
+				if(target == NULL){
+					printf("Contact is missing. Review your parameters.%s", seq);
 				}else{
-				    arg2 = args[2];
-					addMessage(target, "You", arg2);
+					if(target->status == STATUS_DEAD)
+						printf("Contact is down. Oh well.%s", seq);
+					else{
+						int hasRepeated = 0;
 
-					char * json_msg = makeJSONMessage(arg2);
-					message_send(target, json_msg);
-					free(json_msg);
+						for(j=0; j<listIndex; j++){
+							if(list[j] == target){
+								hasRepeated = 1;
+							}
+						}
 
-					printf("%s", seq);
+						if(!hasRepeated){
+							list[listIndex++] = target;
+						}
+					}
 				}
 			}
 		}
+
+		if(messageTargets!=NULL){
+			for(i=0; i<targetAmount; i++)
+				free(messageTargets[i]);
+			free(messageTargets);
+		}
+
+		messageTargets = (char **)malloc(listIndex*sizeof(char *));
+
+		for(i=0; i<listIndex; i++){
+			messageTargets[i] = (char *)malloc((strlen(list[i]->nickname)+1)*sizeof(char));
+			strcpy(messageTargets[i], list[i]->nickname);
+		}
+
+		targetAmount = listIndex;
+		broadcasting = nowBroadcasting;
+
+		/*if(narg == 2){
+			strcpy(messageTarget, arg1);
+			printf("%s", seq);
+		}else{
+		    arg2 = args[2];
+			addMessage(target, "You", arg2);
+
+			char * json_msg = makeJSONMessage(arg2);
+			message_send(target, json_msg);
+			free(json_msg);
+
+			printf("%s", seq);
+		}*/
 	}
 
 	freeMatrix(args, narg);
@@ -364,14 +401,16 @@ void processInboundConnections(contact * var){
 }
 
 int interface_init(){
-	int i;
+	int i, j;
 
 	char seq[] = "\n\n\t> ";
 
 	printf("/tYet Another P2P Chat (YAPC)\n");
 	printf("\nType /help if you need help.%s", seq);
 
-	messageTarget[0] = '\0';
+	messageTargets = NULL;
+	broadcasting = 0;
+	targetAmount = 0;
 
 	while(isRunning()){
 		char * input = (char *)malloc(512*sizeof(char));
@@ -443,29 +482,56 @@ int interface_init(){
 				free(command);
 			}else{
 				printf("\n");
-				contact * target = hash_retrieveContact(messageTarget);
 
-				if(target == NULL){
-					printf("No contact set to message to. Need any /help?%s", seq);
+				if(broadcasting){
+					contact * current;
+
+					for(current = contactList; current!=NULL; current = current->next){
+						if(current->status != STATUS_DEAD){
+							addMessage(current, "You", input);
+
+							char * json_msg = makeJSONMessage(input);
+							message_send(current, json_msg);
+							free(json_msg);
+
+							printf("%s", seq);
+						}
+					}
 				}else{
-					if(target->status == STATUS_DEAD)
-						printf("Your target contact disconnected. Message not sent.%s", seq);
-					else{
-						/*char * msg = (char *)malloc(512*sizeof(char));
+					if(messageTargets == NULL || targetAmount == 0){
+						printf("No contact set to message to. Need any /help?%s", seq);
+					}else{
+						for(i=0; i<targetAmount; i++){
+							contact * target = hash_retrieveContact(messageTargets[i]);
 
-						sscanf(input, "%s", msg);
-						sscanf(input, "%[^\n]", msg);*/
+							int removeFromList = 0;
 
-					    // Salva a mensagem no historico
-					   	addMessage(target, "You", input);
+							if(target == NULL){
+								printf("%s no longer exists.%s", seq);
+								removeFromList = 1;
+							}else{
+								if(target->status == STATUS_DEAD){
+									printf("%s has disconnected. Message not sent.%s", seq);
+									removeFromList = 1;
+								}else{
+									addMessage(target, "You", input);
 
-						char * json_msg = makeJSONMessage(input);
-						message_send(target, json_msg);
-						free(json_msg);
+									char * json_msg = makeJSONMessage(input);
+									message_send(target, json_msg);
+									free(json_msg);
 
-						printf("%s", seq);
+									printf("%s", seq);
+								}
+							}
 
-						//free(msg);
+							if(removeFromList){
+								for(j=i+1; j<targetAmount; j++){
+									messageTargets[j-1] = messageTargets[j];
+								}
+							}
+
+							targetAmount--;
+						}
 					}
 				}
 			}
