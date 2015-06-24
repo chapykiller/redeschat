@@ -198,29 +198,41 @@ void *connections_listen(void *data)
 
 				    contact *contact_by_host = hash_retrieveContact(host_name);
 
-				    if(contact_by_host == NULL || contact_by_host->status == STATUS_ALIVE)
+				    if(contact_by_host == NULL || contact_by_host->status == STATUS_DEAD)
                     {
-                        contactNode *search_node = NULL;
+                        contactNode *search_node;
 	                    int ignore = 0;
 
                         pthread_mutex_lock(&queueMutex);
-                       
+
                         for(search_node = contactQueue; search_node != NULL; search_node = search_node->next)
                         {
                             if(strcmp(search_node->value->host_name, host_name) == 0)
                             {
                                 ignore = 1;
-                                search_node = NULL;
+                                break;
                             }
                         }
-	
+
                         pthread_mutex_unlock(&queueMutex);
-                        
+
                         if(ignore == 0)
                         {
                             // Adiciona para a lista ligada
                             queueContact(newContact);
                         }
+                        else
+                        {
+                            close(connected);
+                            pthread_mutex_destroy(&newContact->messageMutex);
+                            free(newContact);
+                        }
+                    }
+                    else
+                    {
+                        close(connected);
+                        pthread_mutex_destroy(&newContact->messageMutex);
+                        free(newContact);
                     }
                 }
                 else
