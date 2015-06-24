@@ -2,13 +2,17 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
+#include <time.h>
 
 #include "contact.h"
 
 void addMessage(contact * cont, const char * origin, char * message){
 	pthread_mutex_lock(&cont->messageMutex);
 
-	char * copy = (char *)malloc(553*sizeof(char));
+	struct tm * timestr = localtime(time(NULL));
+
+	char * copy = (char *)malloc(561*sizeof(char));
+	sprintf(copy, "[%02d:%02d] ", timestr->tm_hour, timestr->tm_min);
 	strcpy(copy, origin);
 	strcat(copy, ": ");
 	strcat(copy, message);
