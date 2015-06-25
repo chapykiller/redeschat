@@ -205,7 +205,7 @@ void doMsg(char * input, char seq[]){
 		int listIndex = 0;
 
 		for(i=1; i<narg; i++){
-			if(strcmp(args[i], "broadcast")){
+			if(strcmp(args[i], "broadcast")==0){
 				nowBroadcasting = 1;
 			}else{
 				contact * target = hash_retrieveContact(args[i]);
@@ -412,7 +412,7 @@ int interface_init(){
 
 	char seq[] = "\n\n\t> ";
 
-	printf("/tYet Another P2P Chat (YAPC)\n");
+	printf("\tYet Another P2P Chat (YAPC)\n");
 	printf("\nType /help if you need help.%s", seq);
 
 	messageTargets = NULL;
@@ -514,11 +514,11 @@ int interface_init(){
 							int removeFromList = 0;
 
 							if(target == NULL){
-								printf("%s no longer exists.%s", messageTargets[i], seq);
+								printf("%s no longer exists.\n", messageTargets[i]);
 								removeFromList = 1;
 							}else{
 								if(target->status == STATUS_DEAD){
-									printf("%s has disconnected. Message not sent.%s", messageTargets[i], seq);
+									printf("%s has disconnected. Message not sent.\n", messageTargets[i]);
 									removeFromList = 1;
 								}else{
 									addMessage(target, "You", input);
@@ -539,6 +539,8 @@ int interface_init(){
 
 							targetAmount--;
 						}
+
+						printf("%s", seq);
 					}
 				}
 			}
