@@ -250,6 +250,8 @@ void doMsg(char * input, char seq[]){
 
 		printf("%s", seq);
 
+		free(list);
+
 		/*if(narg == 2){
 			strcpy(messageTarget, arg1);
 			printf("%s", seq);
@@ -468,7 +470,7 @@ int interface_init(){
 
 					displayContacts(seq);
 				}else if(cmp(command, "/quit")){
-				    broadcast_dead();
+                    broadcast_dead();
 					stopRunning();
 				}else if(cmp(command, "/add")){
 					printf("\n");
@@ -500,8 +502,6 @@ int interface_init(){
 							char * json_msg = makeJSONMessage(input);
 							message_send(current, json_msg);
 							free(json_msg);
-
-							printf("%s", seq);
 						}
 					}
 				}else{
@@ -526,8 +526,6 @@ int interface_init(){
 									char * json_msg = makeJSONMessage(input);
 									message_send(target, json_msg);
 									free(json_msg);
-
-									printf("%s", seq);
 								}
 							}
 

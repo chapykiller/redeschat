@@ -21,7 +21,7 @@ int message_send(contact *receiver, char *send_data)
     // Se foi passado um contato inválido
     if(receiver == 0)
     {
-        perror("Receiver doesn't exist");
+        printf("Receiver doesn't exist.\n");
         return -1;
     }
 

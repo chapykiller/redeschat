@@ -200,7 +200,7 @@ void *connections_listen(void *data)
 
 				    if(contact_by_host == NULL || contact_by_host->status == STATUS_DEAD)
                     {
-                        contactNode *search_node, *previous_node;
+                        contactNode *search_node, *previous_node = NULL;
 
                         pthread_mutex_lock(&queueMutex);
 
@@ -208,7 +208,14 @@ void *connections_listen(void *data)
                         {
                             if(strcmp(search_node->value->host_name, host_name) == 0)
                             {
-                                previous_node->next = search_node->next;
+                                if(previous_node == NULL)
+                                {
+                                    contactQueue = search_node->next;
+                                }
+                                else
+                                {
+                                    previous_node->next = search_node->next;
+                                }
                                 break;
                             }
 
@@ -263,7 +270,7 @@ int connections_connect(contact *newContact, int port)
 
     if(newContact == 0)
     {
-        perror("Contact not allocated");
+        printf("Contact not allocated.\n");
         return -1;
     }
 

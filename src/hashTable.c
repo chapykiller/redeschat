@@ -143,12 +143,10 @@ void hash_removeContact(char * key)
 
         if(--contactTable.table[hash]->nodeContact->references == 0)
         {
-            if(contactTable.table[hash]->nodeContact->prev != NULL){
-                contactTable.table[hash]->nodeContact->prev->next = contactTable.table[hash]->nodeContact->next;
-            }
+            contactList = contactTable.table[hash]->nodeContact->next;
 
             if(contactTable.table[hash]->nodeContact->next != NULL){
-                contactTable.table[hash]->nodeContact->next->prev = contactTable.table[hash]->nodeContact->prev;
+                contactTable.table[hash]->nodeContact->next->prev = NULL;
             }
             
             pthread_mutex_destroy(&contactTable.table[hash]->nodeContact->messageMutex);
