@@ -211,10 +211,10 @@ void doMsg(char * input, char seq[]){
 				contact * target = hash_retrieveContact(args[i]);
 
 				if(target == NULL){
-					printf("Contact is missing. Review your parameters.%s", seq);
+					printf("%s is missing. Review your parameters.\n", args[i]);
 				}else{
 					if(target->status == STATUS_DEAD)
-						printf("Contact is down. Oh well.%s", seq);
+						printf("%s is down. Oh well.\n", args[i]);
 					else{
 						int hasRepeated = 0;
 
@@ -247,6 +247,8 @@ void doMsg(char * input, char seq[]){
 
 		targetAmount = listIndex;
 		broadcasting = nowBroadcasting;
+
+		printf("%s", seq);
 
 		/*if(narg == 2){
 			strcpy(messageTarget, arg1);
