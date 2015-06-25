@@ -121,6 +121,14 @@ void hash_removeContact(char * key)
 
             if(--temp->nodeContact->references == 0)
             {
+                if(temp->nodeContact->prev != NULL){
+                    temp->nodeContact->prev->next = temp->nodeContact->next;
+                }
+
+                if(temp->nodeContact->next != NULL){
+                    temp->nodeContact->next->prev = temp->nodeContact->prev;
+                }
+
                 pthread_mutex_destroy(&temp->nodeContact->messageMutex);
                 free(temp->nodeContact);
             }
@@ -135,9 +143,18 @@ void hash_removeContact(char * key)
 
         if(--contactTable.table[hash]->nodeContact->references == 0)
         {
+            if(contactTable.table[hash]->nodeContact->prev != NULL){
+                contactTable.table[hash]->nodeContact->prev->next = contactTable.table[hash]->nodeContact->next;
+            }
+
+            if(contactTable.table[hash]->nodeContact->next != NULL){
+                contactTable.table[hash]->nodeContact->next->prev = contactTable.table[hash]->nodeContact->prev;
+            }
+            
             pthread_mutex_destroy(&contactTable.table[hash]->nodeContact->messageMutex);
             free(contactTable.table[hash]->nodeContact);
         }
+
         free(contactTable.table[hash]->key);
         free(contactTable.table[hash]);
 
