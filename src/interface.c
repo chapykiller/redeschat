@@ -547,5 +547,11 @@ int interface_init(){
 		free(input);
 	}
 
+    for(i = 0; i < targetAmount; i++)
+    {
+        free(messageTargets[i]);
+    }
+    free(messageTargets);
+
 	return 0;
 }
