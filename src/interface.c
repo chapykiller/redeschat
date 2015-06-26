@@ -506,7 +506,7 @@ int interface_init(){
 					}
 				}else{
 					if(messageTargets == NULL || targetAmount == 0){
-						printf("No contact set to message to. Need any /help?%s", seq);
+						printf("No contact set to message to. Need any /help?");
 					}else{
 						for(i=0; i<targetAmount; i++){
 							contact * target = hash_retrieveContact(messageTargets[i]);
@@ -533,14 +533,14 @@ int interface_init(){
 								for(j=i+1; j<targetAmount; j++){
 									messageTargets[j-1] = messageTargets[j];
 								}
-							}
 
-							targetAmount--;
+							    targetAmount--;
+							}
 						}
 
-						printf("%s", seq);
 					}
 				}
+			    printf("%s", seq);
 			}
 		}
 
