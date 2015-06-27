@@ -22,6 +22,7 @@
 */
 int connections_listenerCreate(connectionListener **conListener, int port)
 {
+    // Aloca um listener para novas conexões
     *conListener = (connectionListener*)malloc( sizeof(connectionListener) );
     if(conListener == 0)
     {
@@ -41,6 +42,7 @@ int connections_listenerCreate(connectionListener **conListener, int port)
         return -2;
     }
 
+    // Faz o socket ser não bloqueante, para poder gerar um timeout e não bloquear a thread por muito tempo
     if(fcntl((*conListener)->socketvar, F_SETFL, O_NONBLOCK) < 0)
     {
         close((*conListener)->socketvar);
@@ -49,7 +51,7 @@ int connections_listenerCreate(connectionListener **conListener, int port)
         return -3;
     }
 
-    int true = 1;
+    int true = 1; // Variável auxiliar
 
     /* Funcao setsockopt(int socket, int level, int optname, void*optval, size_t optlen)
 
@@ -143,6 +145,7 @@ void *connections_listen(void *data)
         timev.tv_sec = 1;
         timev.tv_usec = 0;
 
+        // Inicializações necessárias para o timeout
         fd_set listener_fd_set;
         FD_ZERO(&listener_fd_set);
         FD_SET(conListener->socketvar, &listener_fd_set);
@@ -150,6 +153,7 @@ void *connections_listen(void *data)
         // Variavel para armazenar o tamanho de endereco do cliente conectado
         sin_size = sizeof(struct sockaddr_in);
 
+        // Verifica (com timeout) se há uma conexão pendente
         int ret = select(conListener->socketvar + 1, &listener_fd_set, NULL, NULL, &timev);
 
         if(ret < 0)
@@ -191,23 +195,29 @@ void *connections_listen(void *data)
                     timeout.tv_sec = 1;
                     timeout.tv_usec = 0;
 
+                    // Configura a socket criada com um timeout para recebimento de mensagens
                     if (setsockopt(newContact->socketvar, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(struct timeval)) == -1)
                     {
                         perror("Error in Setsockopt");
                     }
 
-				    contact *contact_by_host = hash_retrieveContact(host_name);
+				    // Variável auxiliar
+                    contact *contact_by_host = hash_retrieveContact(host_name);
 
-				    if(contact_by_host == NULL || contact_by_host->status == STATUS_DEAD)
+				    // Se o contato nao existir na lista, ou se existir mas estiver offline
+                    if(contact_by_host == NULL || contact_by_host->status == STATUS_DEAD)
                     {
                         contactNode *search_node, *previous_node = NULL;
 
                         pthread_mutex_lock(&queueMutex);
 
+                        // Percorre a fila de contatos para verificar se ja existe um com esse hostname
                         for(search_node = contactQueue; search_node != NULL; search_node = search_node->next)
                         {
+                            // Se existir
                             if(strcmp(search_node->value->host_name, host_name) == 0)
                             {
+                                // Tira o contato da fila
                                 if(previous_node == NULL)
                                 {
                                     contactQueue = search_node->next;
@@ -224,6 +234,7 @@ void *connections_listen(void *data)
 
                         pthread_mutex_unlock(&queueMutex);
 
+                        // Libera a memória do contato retirado
                         if(search_node != NULL)
                         {
                             close(search_node->value->socketvar);
@@ -233,11 +244,12 @@ void *connections_listen(void *data)
                              free(search_node);
                         }
                         
-                        // Adiciona para a lista ligada
+                        // Adiciona para a fila de contatos esperando por nickname
                         queueContact(newContact);
                     }
-                    else
+                    else // Se o contato ja existia e estava online
                     {
+                        // Libera a memória alocada para o contato atual
                         close(connected);
                         pthread_mutex_destroy(&newContact->messageMutex);
                         free(newContact);
@@ -253,9 +265,9 @@ void *connections_listen(void *data)
         sleep(1);
     }
 
-    close(conListener->socketvar);
+    close(conListener->socketvar); // Fecha o socket utilizado para ouvir conexões
 
-    pthread_exit(0);
+    pthread_exit(0); // Finaliza a thread
 }
 
 /*
@@ -295,6 +307,7 @@ int connections_connect(contact *newContact, int port)
         return -3;
     }
 
+    // Configura a socket para ter um timeout na hora de receber mensagens
     if (setsockopt(newContact->socketvar, SOL_SOCKET, SO_RCVTIMEO, (char*)&timev, sizeof(struct timeval)) == -1)
     {
         perror("Error in Setsockopt");

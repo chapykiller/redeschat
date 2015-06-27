@@ -120,6 +120,7 @@ void *message_receive(void *data)
                 }
                 while(json_message != NULL);
 
+                // Altera o ultimo tempo de envio para o tempo atual
                 sender->lastUpdate = time(NULL);
             }
         }
@@ -127,5 +128,5 @@ void *message_receive(void *data)
         sleep(1);
     }
 
-    pthread_exit(0);
+    pthread_exit(0); // Finaliza a thread
 }

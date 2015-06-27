@@ -13,7 +13,8 @@
 char * validateJSON(char * arg, int * n);
 
 /*
- * Cria uma mensagem JSON a partir de uma mensage
+ * Cria uma mensagem JSON a partir de uma mensagem
+ * de texto
 */
 char * makeJSONMessage(char * string);
 
