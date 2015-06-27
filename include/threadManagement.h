@@ -3,18 +3,24 @@
 
 #include <pthread.h>
 
-struct threadNode;
-
+// Struct utilizada pela lista encadeada de threads
 typedef struct threadNode{
-	pthread_t * thread;
+	pthread_t * thread; // Uma thread
 
 	struct threadNode * next;
 	struct threadNode * prev;
 } threadNode;
 
-threadNode * threadList;
+threadNode * threadList; // Lista encadeada de threads
 
+/*
+ * Cria uma thread e retorna o ponteiro
+*/
 pthread_t * createThread();
+
+/*
+ * Inicializa as variáveis necessárias
+*/
 void thread_init();
 
 #endif
