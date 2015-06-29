@@ -613,7 +613,7 @@ int interface_init(){
 					doMsg(input, seq);
 				}else if(cmp(command, "/broadcast")){
 					// Se o comando for /broadcast, muda o modo de mensagem para broadcast.
-					printf("\n");
+					printf("\n%s", seq);
 
 					broadcasting = 1;
 				}else if(cmp(command, "/display")){
