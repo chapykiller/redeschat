@@ -13,6 +13,11 @@ void displayContacts(char seq[]);
 void addContact(char * input, char seq[]);
 
 /*
+	Trata um comando do usuário que diz para que um usuário seja removido.
+*/
+void removeContact(char * input, char seq[]);
+
+/*
  * Realiza os procedimentos necessários para
  * enviar uma mensagem
 */

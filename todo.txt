@@ -1,3 +1,0 @@
-Impedir enviar mensagens para contatos offline
-
-Corrigir possivel bug grafico no /msg, que não mostra o prompt de comando após o uso

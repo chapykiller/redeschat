@@ -1,2 +1,22 @@
-# redeschat
-Trabalho de Redes
+#########################################
+#        Trabalho de Redes              #
+#########################################
+#                                       #
+############  Compilar  #################
+    Utilize o comando:
+            $ make
+#########################################
+#                                       #
+###########  Executar  ##################
+    Utilize o comando:
+            $ make run
+#########################################
+#                                       #
+####  Limpar arquivos da compilação  ####
+    Utilize o comando:
+            $ make clean
+#########################################
+#                                       #
+###########  Utilização  ################
+    Digite /help no programa
+########################################

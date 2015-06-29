@@ -190,30 +190,31 @@ void hash_removeContact(char * key)
     }
 
     // Checa se o primeiro contato deve ser removido.
-    if(cmp(key, contactTable.table[hash]->key))
+    if(contactTable.table[hash] != NULL && cmp(key, contactTable.table[hash]->key))
     {
-        hashNode * temp = contactTable.table[hash]->next;
+        hashNode * temp = contactTable.table[hash];
+        contactTable.table[hash] = contactTable.table[hash]->next;
 
         // Se o número de referencias for zero, remove-o.
-        if(--contactTable.table[hash]->nodeContact->references == 0)
+        if(--temp->nodeContact->references == 0)
         {
             // Se o contato era o primeiro da lista, então o primeiro será
             // o próximo do atual primeiro.
-            contactList = contactTable.table[hash]->nodeContact->next;
+            if(temp->nodeContact->prev != NULL){
+                temp->nodeContact->prev->next = temp->nodeContact->next;
+            }
 
             // Se o contato era o primeiro da lista, então o próximo nó não terá nó anterior.
-            if(contactTable.table[hash]->nodeContact->next != NULL){
-                contactTable.table[hash]->nodeContact->next->prev = NULL;
+            if(temp->nodeContact->next != NULL){
+                temp->nodeContact->next->prev = temp->nodeContact->prev;
             }
             
-            pthread_mutex_destroy(&contactTable.table[hash]->nodeContact->messageMutex);
-            free(contactTable.table[hash]->nodeContact);
+            pthread_mutex_destroy(&temp->nodeContact->messageMutex);
+            free(temp->nodeContact);
         }
 
-        free(contactTable.table[hash]->key);
-        free(contactTable.table[hash]);
-
-        contactTable.table[hash] = temp;
+        free(temp->key);
+        free(temp);
     }
 
     // Dá unlock no mutex.
