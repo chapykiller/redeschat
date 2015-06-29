@@ -23,7 +23,7 @@ void addMessage(contact * cont, const char * origin, char * message){
     // Inicializa a string da mensagem.
 	char * copy = (char *)malloc(561*sizeof(char));
 	sprintf(copy, "[%02d:%02d] ", timestr->tm_hour, timestr->tm_min);	// Concatena a timestamp.
-	strcpy(copy, origin);					// Concatena a origem da mensagem
+	strcat(copy, origin);					// Concatena a origem da mensagem
 	strcat(copy, ": ");						// Concate um delimitador
 	strcat(copy, message);					// Concatena a mensagem.
 
