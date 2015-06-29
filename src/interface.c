@@ -254,6 +254,45 @@ void addContact(char * input, char seq[]){
 }
 
 /*
+	Trata um comando do usuário que diz para que um usuário seja removido.
+*/
+void removeContact(char * input, char seq[]){
+	int narg;
+
+	// Quebra a string em strings menores para que o comando possa ser entendido.
+	char ** args = decompose(input, &narg);
+	char * contact_string = NULL;
+
+	if(narg != 2){
+		// Se o comando não tiver 2 palavras, sua semântica está incorreta.
+		printf("Syntax is wrong. Please consult /help if you need to.%s", seq);
+	}else{
+	    contact_string = args[1];
+
+		contact * contact_by_string = hash_retrieveContact(contact_string);
+
+		// Se não existir o contato, uma mensagem de erro é exibida.
+		if(contact_by_string == NULL){
+			printf("No contact match.%s", seq);
+		}else{
+            // Avisa ao contato que desconectou (funciona como um bloqueio)
+            char *deadMessage = makeJSONControl(1); // Cria a mensagem de controle para avisar desconexão
+
+            message_send(contact_by_string, deadMessage); // Envia a mensagem
+
+            free(deadMessage); // Libera a memória
+
+			// Deleta o contato.
+			hash_removeContact(contact_by_string->nickname);
+			hash_removeContact(contact_by_string->host_name);
+
+            printf("Contact removed.%s", seq);
+		}
+	}
+
+	freeMatrix(args, narg);
+}
+/*
 	Trata o comando /msg de um usuário.
 */
 void doMsg(char * input, char seq[]){
@@ -585,6 +624,7 @@ int interface_init(){
 					printf("Yet Another P2P Chat provides the following commands:\n\n");
 					printf(" - /help\t\t\tIt must be pretty obvious what this command does.\n");
 					printf(" - /add <hostname> <nickname>\tAdds contact with IP hostname under the name of nickname.\n");
+					printf(" - /remove <contact>\t\tRemoves a contact form your list.\n");
 					printf(" - /list\t\t\tLists all your contacts.\n");
 					printf(" - /quit\t\t\tQuits the application. :(\n");
 					printf(" - /display <contact>\t\tDisplays the last %d messages with contact.\n", MAX_MESSAGES);
@@ -606,6 +646,11 @@ int interface_init(){
 					printf("\n");
 
 					addContact(input, seq);
+				}else if(cmp(command, "/remove")){
+					// Se o comando for /remove, processa o input do usuário de maneira apropriada.
+					printf("\n");
+
+					removeContact(input, seq);
 				}else if(cmp(command, "/msg")){
 					// Se o comando for /msg, muda os destinatários das mensagens.
 					printf("\n");
